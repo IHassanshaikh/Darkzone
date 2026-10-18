@@ -1,0 +1,44 @@
+[
+  {
+    "id": "area-a",
+    "name": "Area A (Riverbank North)",
+    "lat": 24.895,
+    "lng": 67.012,
+    "population": 1200,
+    "vulnerableShare": 0.15,
+    "hazardSeverity": 0.3,
+    "networkFailure": 0.1,
+    "actualReports": 58,
+    "lastReportAt": "2026-10-18T02:40:00Z",
+    "dataQuality": "ok",
+    "verification": "none"
+  },
+  {
+    "id": "area-b",
+    "name": "Area B (South Lowlands)",
+    "lat": 24.84,
+    "lng": 66.995,
+    "population": 950,
+    "vulnerableShare": 0.22,
+    "hazardSeverity": 0.4,
+    "networkFailure": 0.2,
+    "actualReports": 36,
+    "lastReportAt": "2026-10-18T02:15:00Z",
+    "dataQuality": "partial",
+    "verification": "none"
+  },
+  {
+    "id": "area-c",
+    "name": "Area C (Delta Sector 9)",
+    "lat": 24.815,
+    "lng": 67.045,
+    "population": 800,
+    "vulnerableShare": 0.35,
+    "hazardSeverity": 0.9,
+    "networkFailure": 1.0,
+    "actualReports": 1,
+    "lastReportAt": "2026-10-18T00:30:00Z",
+    "dataQuality": "ok",
+    "verification": "none"
+  }
+]

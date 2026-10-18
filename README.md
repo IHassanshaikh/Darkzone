@@ -1,42 +1,76 @@
-# ReliefOS 🆘📡
+# ReliefOS + DARK ZONE (Full-Stack Next.js with Gemini 2.5 Flash)
 
-> **"ReliefOS doesn't only help those who ask. It finds those who can't ask, then sends supplies there first."**
-
-An intelligent, offline-first disaster response coordination platform built for CODE//CONNECT'26. **ReliefOS + DARK ZONE** identifies high-risk areas suffering from communication blackouts (Dark Zones), coordinates camp inventories, and manages field volunteer dispatches—even with zero internet connectivity.
+> *"ReliefOS doesn't only help those who ask. It finds those who can't ask, then sends supplies there first."*
 
 ---
 
-## 🌟 Key Features
+## 1. Problem & Core Mission
 
-* 🕵️ **DARK ZONE Risk Engine**: Evaluates expected vs. actual reporting gaps alongside hazard severity, vulnerability, and network failure rates to flag silent risk zones needing immediate human verification.
-* 📶 **Offline-First PWA & Auto-Sync**: Operates seamlessly without internet using Service Workers and IndexedDB; automatically flushes pending queues once reconnected.
-* 🔒 **Simulated Encrypted Mesh Network**: Leverages the Web Crypto API (ECDH P-256 + AES-GCM) to route distress messages via peer-to-peer device hops (Bluetooth / BLE) to nearby field volunteers.
-* ⛺ **Resource & Allocation Engine**: Automated shortage detection and smart supply transfers between camps based on surplus and proximity.
-* 👥 **Multi-Role Dashboards**: Tailored command centers for **Rescue Coordinators (Admins)**, **Camp Managers**, and **Field Volunteers**.
-* 📱 **Affected Person Mobile Bridge**: Low-power mobile interface allowing citizens to broadcast SOS messages and locate nearby camps/volunteers offline.
+In sudden-onset disaster situations (floods, earthquakes, infrastructure collapse), conventional response applications react exclusively to incoming SOS calls and crowdsourced reports. This creates a dangerous **survivorship bias**:
+- Vulnerable populations (the elderly, infants, individuals with mobility impairments, and isolated communities) are often physically or technologically unable to transmit distress calls.
+- Telecommunication grids, cellular towers, and power lines frequently suffer catastrophic outages in the hardest-hit sectors.
 
----
-
-## 🛠️ Tech Stack
-
-* **Frontend**: React 18, Tailwind CSS, Vite, React Router, Leaflet / OpenStreetMap, Recharts, `vite-plugin-pwa`, `idb-keyval`
-* **Backend**: Node.js, Express REST API, Zod Validation
-* **Database & Auth**: Supabase PostgreSQL, Supabase Realtime
-* **Security & Cryptography**: Web Crypto API (ECDH P-256 + AES-GCM)
+**ReliefOS + DARK ZONE** introduces an intelligence-driven approach that detects **reporting anomalies**:
+1. It compares expected emergency reporting rates against actual inbound reports.
+2. If hazard severity and vulnerability are high but report volume is unexpectedly low, the area is flagged as a **Potential Dark Zone**.
+3. It recommends human field verification first, followed by prioritized resource distribution.
+4. **Core Rule:** Every automatic classification carries a visible **"Suggested"** badge and requires human confirmation before dispatching relief or field teams.
 
 ---
 
-## ⚙️ Quick Start
+## 2. Next.js App Router Architecture & AI Integration
 
+The system runs as a single, unified **Next.js Full-Stack App Router** application with Gemini 2.5 Flash disaster intelligence:
+- **Frontend App Router**: 12 responsive views with SSR/Client hydration, Tailwind CSS, Leaflet maps (dynamic with `ssr: false`), Recharts, and role switching.
+- **Backend API Route Handlers (`/api/v1/*`)**: Complete REST API implemented directly within Next.js route handlers (`app/api/v1/.../route.js`).
+- **Gemini 2.5 Flash Disaster Copilot**: Live Google Gemini integration across every screen with automatic heuristic fallback.
+- **Simulated Mesh Layer**: Demonstrates multi-hop zero-knowledge forwarding with real **Web Crypto API (ECDH P-256 + AES-GCM 256)** encryption from sensor to gateway node.
+- **Citizen Mobile App**: React Native standalone app (`reliefos-mobile`) & web companion (`/mobile`) with `#2D4A22` gradient bar, Mobile-to-Mobile BLE mesh routing without Wi-Fi, and live first-aid advice.
+
+---
+
+## 3. DARK ZONE Detection Logic & Thresholds
+
+An area is flagged as a **Potential Dark Zone** only if **all three conditions** are met simultaneously:
+
+$$\text{Silence Ratio} \ge 0.6$$
+$$\text{Hazard Severity} \ge 0.6$$
+$$\text{Vulnerable Share} \ge 0.25 \quad \text{OR} \quad \text{Network Failure} \ge 0.5$$
+
+$$\text{Composite Score} = 100 \times (0.35 \times \text{Silence} + 0.35 \times \text{Hazard} + 0.10 \times \text{Vuln} + 0.20 \times \text{Network})$$
+
+> **Critical Safety Principle:** Low incoming reports alone never trigger a Dark Zone flag, preventing safe or evacuated areas with low report counts from causing false alarms.
+
+---
+
+## 4. Screen-by-Screen Tour
+
+| Route | Screen Name | Key Features |
+|---|---|---|
+| `/` | **Command Dashboard** | Dynamic Leaflet map with colored area polygons & camp pins; 4 summary metric cards; unified urgency-ranked Priority List; **Gemini 2.5 Flash Tactical Situation Briefing**. |
+| `/areas/:id` | **Area Detail (Dark Zone Gauge)** | Circular SVG score gauge; expected vs actual reports disparity chart; Send Field Team assignment modal; **Gemini Sector Tactical Risk Assessment**. |
+| `/resources` | **Resources & Camp Stock** | Stock vs need capacity bars across 4 relief hubs; Camp B critical water shortage highlight (-160L deficit); **Gemini Multi-Hub Inventory Balancing**. |
+| `/allocation` | **Allocation & Delivery Tracker** | Suggested transfers generated by nearest-camp surplus heuristic; Approve button creates delivery duty; **Gemini Supply Chain Route Optimizer**. |
+| `/camp-manager` | **Camp Manager Operations** | Real-time intake and restock logging; burn-rate tracking; **Gemini Predictive Camp Logistics Forecaster**. |
+| `/volunteer` | **Volunteer Dashboard** | Offline-resilient personal duties list; IndexedDB offline queue; **Gemini Field Responder Safety Advisor**. |
+| `/volunteers` | **Volunteers Directory** | Roster of 8 certified field operators with skills, coordinates, and availability status toggles. |
+| `/mesh` | **Mesh Simulator** | Authenticated Web Crypto API (ECDH P-256 + AES-GCM 256); **Gemini Mesh Topology & Latency Diagnostics**. |
+| `/admin` | **Admin Panel (Admin Only)** | Role-gated statistics overview; 8 metric cards matching seed benchmarks; 4 Recharts visualizations; **Gemini Strategic Operations Directive**. |
+| `/reports/triage` | **Distress Report Triage** | Rule-based entity extraction parser & **Gemini 2.5 Flash Autonomous Deep Triage** classifying urgency, categories, and victim counts. |
+| `/mobile` | **Citizen Mobile App** | `#2D4A22` gradient bar, Mobile-to-Mobile relay without Wi-Fi, Camp burn-rate forecast, and live first-aid SOS chat advisor. |
+| `/limits` | **Limits & Trade-offs** | Transparency matrix of what was built vs left out; research literature disclosure. |
+
+---
+
+## 5. Running the Application
+
+### Development
 ```bash
-# Clone the repository
-git clone [https://github.com/your-username/relief-os.git](https://github.com/your-username/relief-os.git)
-
-# Install dependencies
-npm install
-
-# Run frontend in development mode
 npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-# Build production PWA bundle
-npm run build && npm run preview
+### Production Build
+```bash
+npm run build && npm run start
+```

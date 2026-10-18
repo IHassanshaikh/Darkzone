@@ -1,0 +1,70 @@
+[
+  {
+    "id": "camp-a",
+    "name": "Camp A (Main Stadium)",
+    "lat": 24.872,
+    "lng": 67.03,
+    "capacity": 500,
+    "occupancy": 420,
+    "minReserve": 50,
+    "type": "camp",
+    "updatedAt": "2026-10-18T01:00:00Z",
+    "items": [
+      { "item": "water", "stock": 400, "need": 350 },
+      { "item": "food", "stock": 600, "need": 500 },
+      { "item": "medicine", "stock": 150, "need": 100 },
+      { "item": "relief", "stock": 200, "need": 150 }
+    ]
+  },
+  {
+    "id": "camp-b",
+    "name": "Camp B (Coastal School)",
+    "lat": 24.835,
+    "lng": 67.025,
+    "capacity": 300,
+    "occupancy": 280,
+    "minReserve": 40,
+    "type": "camp",
+    "updatedAt": "2026-10-18T01:15:00Z",
+    "items": [
+      { "item": "water", "stock": 20, "need": 180 },
+      { "item": "food", "stock": 220, "need": 200 },
+      { "item": "medicine", "stock": 80, "need": 75 },
+      { "item": "relief", "stock": 100, "need": 90 }
+    ]
+  },
+  {
+    "id": "camp-c",
+    "name": "Camp C (Hilltop Center)",
+    "lat": 24.91,
+    "lng": 67.05,
+    "capacity": 250,
+    "occupancy": 190,
+    "minReserve": 30,
+    "type": "camp",
+    "updatedAt": "2026-10-18T02:00:00Z",
+    "items": [
+      { "item": "water", "stock": 150, "need": 140 },
+      { "item": "food", "stock": 180, "need": 150 },
+      { "item": "medicine", "stock": 90, "need": 80 },
+      { "item": "relief", "stock": 80, "need": 70 }
+    ]
+  },
+  {
+    "id": "camp-d",
+    "name": "Camp D (East Warehouse)",
+    "lat": 24.845,
+    "lng": 67.06,
+    "capacity": 400,
+    "occupancy": 150,
+    "minReserve": 50,
+    "type": "camp",
+    "updatedAt": "2026-10-18T01:30:00Z",
+    "items": [
+      { "item": "water", "stock": 350, "need": 100 },
+      { "item": "food", "stock": 300, "need": 120 },
+      { "item": "medicine", "stock": 120, "need": 50 },
+      { "item": "relief", "stock": 250, "need": 100 }
+    ]
+  }
+]

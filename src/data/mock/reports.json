@@ -1,0 +1,162 @@
+[
+  {
+    "id": "rep-001",
+    "areaId": "area-c",
+    "text": "Water entered ground floor, grandma cannot walk, need evacuation boat quickly near delta bridge.",
+    "source": "mesh",
+    "label": "Suggested",
+    "extracted": {
+      "age": "elderly",
+      "mobilityIssue": "Yes (cannot walk)",
+      "hazard": "Flooding (ground floor submerged)",
+      "urgency": "Critical",
+      "assistanceNeeded": "Evacuation boat & medical stretcher"
+    },
+    "clientId": "mesh-hop-101",
+    "createdAt": "2026-10-18T00:28:00Z"
+  },
+  {
+    "id": "rep-002",
+    "areaId": "area-a",
+    "text": "Flood water approaching main market street. Embankment sandbags holding for now.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "adult",
+      "mobilityIssue": "No",
+      "hazard": "Rising flood crest",
+      "urgency": "Medium",
+      "assistanceNeeded": "Sandbags & reinforcement"
+    },
+    "clientId": "web-rep-202",
+    "createdAt": "2026-10-18T02:30:00Z"
+  },
+  {
+    "id": "rep-003",
+    "areaId": "area-b",
+    "text": "School roof shelter full. 45 people waiting, need drinking water and infant formula.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "all ages (infants present)",
+      "mobilityIssue": "Not found",
+      "hazard": "Overcrowded shelter isolation",
+      "urgency": "High",
+      "assistanceNeeded": "Drinking water, baby milk formula"
+    },
+    "clientId": "web-rep-203",
+    "createdAt": "2026-10-18T02:10:00Z"
+  },
+  {
+    "id": "rep-004",
+    "areaId": "area-a",
+    "text": "Road clear between Sector 2 and Camp A. Trucks can pass safely.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "adult",
+      "mobilityIssue": "No",
+      "hazard": "Clear passage",
+      "urgency": "Low",
+      "assistanceNeeded": "Route clearance confirmation"
+    },
+    "clientId": "web-rep-204",
+    "createdAt": "2026-10-18T02:00:00Z"
+  },
+  {
+    "id": "rep-005",
+    "areaId": "area-b",
+    "text": "Power lines downed on 3rd cross road. Sparking noticed near puddle.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "Not found",
+      "mobilityIssue": "Not found",
+      "hazard": "Electrical shock hazard / downed grid",
+      "urgency": "High",
+      "assistanceNeeded": "Utility isolation / power shutdown"
+    },
+    "clientId": "web-rep-205",
+    "createdAt": "2026-10-18T01:50:00Z"
+  },
+  {
+    "id": "rep-006",
+    "areaId": "area-a",
+    "text": "5 families evacuated from riverside shanties, now safely at Camp A.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "families",
+      "mobilityIssue": "No",
+      "hazard": "Evacuation complete",
+      "urgency": "Low",
+      "assistanceNeeded": "Shelter registration"
+    },
+    "clientId": "web-rep-206",
+    "createdAt": "2026-10-18T01:40:00Z"
+  },
+  {
+    "id": "rep-007",
+    "areaId": "area-a",
+    "text": "Requesting 20 blankets and dry rations for community hall.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "Not found",
+      "mobilityIssue": "Not found",
+      "hazard": "Cold weather exposure",
+      "urgency": "Medium",
+      "assistanceNeeded": "Blankets and dry food ration packs"
+    },
+    "clientId": "web-rep-207",
+    "createdAt": "2026-10-18T01:25:00Z"
+  },
+  {
+    "id": "rep-008",
+    "areaId": "area-b",
+    "text": "Basement clinic pump failure. Stored insulin at risk of warming.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "Not found",
+      "mobilityIssue": "Not found",
+      "hazard": "Cold chain failure for insulin",
+      "urgency": "High",
+      "assistanceNeeded": "Ice packs / battery backup cold storage"
+    },
+    "clientId": "web-rep-208",
+    "createdAt": "2026-10-18T01:10:00Z"
+  },
+  {
+    "id": "rep-009",
+    "areaId": "area-a",
+    "text": "Volunteer team arrived at North Bridge checkpoint.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "volunteers",
+      "mobilityIssue": "No",
+      "hazard": "Operational status",
+      "urgency": "Low",
+      "assistanceNeeded": "Status logging"
+    },
+    "clientId": "web-rep-209",
+    "createdAt": "2026-10-18T00:55:00Z"
+  },
+  {
+    "id": "rep-010",
+    "areaId": "area-b",
+    "text": "Flood water receding on western perimeter. Road passable by 4x4.",
+    "source": "web",
+    "label": "Suggested",
+    "extracted": {
+      "age": "Not found",
+      "mobilityIssue": "No",
+      "hazard": "Receding water",
+      "urgency": "Low",
+      "assistanceNeeded": "Route assessment"
+    },
+    "clientId": "web-rep-210",
+    "createdAt": "2026-10-18T00:40:00Z"
+  }
+]

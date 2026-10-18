@@ -1,0 +1,92 @@
+[
+  {
+    "id": "r-01",
+    "areaId": "area-a",
+    "text": "Several families displaced near the river bank, need food and blankets.",
+    "extracted": { "age": null, "mobilityIssue": false, "hazard": "flood", "urgency": "medium", "assistanceNeeded": "food and relief" },
+    "source": "volunteer",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T07:10:00Z"
+  },
+  {
+    "id": "r-02",
+    "areaId": "area-a",
+    "text": "Road blocked near main bridge, emergency vehicles cannot pass.",
+    "extracted": { "age": null, "mobilityIssue": false, "hazard": "flood", "urgency": "high", "assistanceNeeded": "infrastructure" },
+    "source": "volunteer",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T07:45:00Z"
+  },
+  {
+    "id": "r-03",
+    "areaId": "area-a",
+    "text": "Elderly woman, cannot walk, needs immediate evacuation from sector 3.",
+    "extracted": { "age": "elderly", "mobilityIssue": true, "hazard": "flood", "urgency": "high", "assistanceNeeded": "evacuation" },
+    "source": "volunteer",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T08:00:00Z"
+  },
+  {
+    "id": "r-04",
+    "areaId": "area-b",
+    "text": "Water supply contaminated, children falling sick.",
+    "extracted": { "age": "children", "mobilityIssue": false, "hazard": "contamination", "urgency": "high", "assistanceNeeded": "clean water and medical" },
+    "source": "field-team",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T06:20:00Z"
+  },
+  {
+    "id": "r-05",
+    "areaId": "area-b",
+    "text": "20 people stranded on rooftop, rising water level.",
+    "extracted": { "age": null, "mobilityIssue": false, "hazard": "flood", "urgency": "critical", "assistanceNeeded": "rescue" },
+    "source": "field-team",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T06:55:00Z"
+  },
+  {
+    "id": "r-06",
+    "areaId": "area-b",
+    "text": "Medicine stock running low at local clinic, need resupply urgently.",
+    "extracted": { "age": null, "mobilityIssue": false, "hazard": null, "urgency": "high", "assistanceNeeded": "medicine" },
+    "source": "volunteer",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T07:30:00Z"
+  },
+  {
+    "id": "r-07",
+    "areaId": "area-b",
+    "text": "Families sheltering in school building, no food for 2 days.",
+    "extracted": { "age": null, "mobilityIssue": false, "hazard": "flood", "urgency": "high", "assistanceNeeded": "food" },
+    "source": "field-team",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T08:10:00Z"
+  },
+  {
+    "id": "r-08",
+    "areaId": "area-b",
+    "text": "Pregnant woman needs medical attention, no doctor available locally.",
+    "extracted": { "age": "adult", "mobilityIssue": true, "hazard": null, "urgency": "critical", "assistanceNeeded": "medical evacuation" },
+    "source": "volunteer",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T08:40:00Z"
+  },
+  {
+    "id": "r-09",
+    "areaId": "area-c",
+    "text": "Elderly couple stuck, no phone signal since yesterday.",
+    "extracted": { "age": "elderly", "mobilityIssue": true, "hazard": "flood", "urgency": "critical", "assistanceNeeded": "evacuation" },
+    "source": "mesh",
+    "label": "Suggested",
+    "createdAt": "2026-10-16T21:10:00Z"
+  },
+  {
+    "id": "r-10",
+    "areaId": "area-a",
+    "text": "Temporary shelter at community center is over capacity, need tents.",
+    "extracted": { "age": null, "mobilityIssue": false, "hazard": "overcrowding", "urgency": "medium", "assistanceNeeded": "shelter" },
+    "source": "volunteer",
+    "label": "Suggested",
+    "createdAt": "2026-10-17T09:05:00Z"
+  }
+]

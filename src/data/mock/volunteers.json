@@ -1,0 +1,74 @@
+[
+  {
+    "id": "vol-1",
+    "name": "Sarah Khan",
+    "skills": ["First Aid", "Search & Rescue", "Radio Ops"],
+    "availability": true,
+    "lat": 24.872,
+    "lng": 67.03,
+    "status": "available"
+  },
+  {
+    "id": "vol-2",
+    "name": "Ahmed Raza",
+    "skills": ["Logistics", "Heavy Vehicle", "Water Sanitation"],
+    "availability": true,
+    "lat": 24.845,
+    "lng": 67.06,
+    "status": "available"
+  },
+  {
+    "id": "vol-3",
+    "name": "Fatima Noor",
+    "skills": ["Paramedic", "Triage", "Field Verification"],
+    "availability": false,
+    "lat": 24.835,
+    "lng": 67.025,
+    "status": "on_duty"
+  },
+  {
+    "id": "vol-4",
+    "name": "Zubair Tariq",
+    "skills": ["Boat Operator", "Dark Zone Scout"],
+    "availability": true,
+    "lat": 24.815,
+    "lng": 67.045,
+    "status": "available"
+  },
+  {
+    "id": "vol-5",
+    "name": "Ayesha Bilal",
+    "skills": ["Community Coordinator", "Child Care"],
+    "availability": false,
+    "lat": 24.91,
+    "lng": 67.05,
+    "status": "on_duty"
+  },
+  {
+    "id": "vol-6",
+    "name": "Hamza Malik",
+    "skills": ["Mechanic", "Generator Repair", "Mesh Relay"],
+    "availability": true,
+    "lat": 24.88,
+    "lng": 67.02,
+    "status": "available"
+  },
+  {
+    "id": "vol-7",
+    "name": "Mariam Siddiqui",
+    "skills": ["Nurse", "Mental Health Support"],
+    "availability": false,
+    "lat": 24.86,
+    "lng": 67.01,
+    "status": "offline"
+  },
+  {
+    "id": "vol-8",
+    "name": "Usman Farooq",
+    "skills": ["Drone Recon", "GIS Mapping"],
+    "availability": true,
+    "lat": 24.85,
+    "lng": 67.04,
+    "status": "available"
+  }
+]

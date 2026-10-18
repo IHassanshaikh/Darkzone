@@ -1,0 +1,50 @@
+[
+  {
+    "id": "camp-a",
+    "name": "Camp A",
+    "lat": 24.85,
+    "lng": 67.00,
+    "areaId": "area-a",
+    "capacity": 400,
+    "occupancy": 310,
+    "minReserve": { "food": 80, "water": 100, "medicine": 20, "relief": 30 },
+    "stock":    { "food": 500, "water": 320, "medicine": 90, "relief": 80 },
+    "need":     { "food": 400, "water": 310, "medicine": 60, "relief": 100 }
+  },
+  {
+    "id": "camp-b",
+    "name": "Camp B",
+    "lat": 24.88,
+    "lng": 67.05,
+    "areaId": "area-b",
+    "capacity": 300,
+    "occupancy": 270,
+    "minReserve": { "food": 60, "water": 100, "medicine": 15, "relief": 20 },
+    "stock":    { "food": 400, "water": 80,  "medicine": 60,  "relief": 50 },
+    "need":     { "food": 380, "water": 540, "medicine": 50,  "relief": 120 }
+  },
+  {
+    "id": "camp-c",
+    "name": "Camp C",
+    "lat": 24.91,
+    "lng": 67.09,
+    "areaId": "area-c",
+    "capacity": 200,
+    "occupancy": 140,
+    "minReserve": { "food": 40, "water": 200, "medicine": 10, "relief": 50 },
+    "stock":    { "food": 300, "water": 200, "medicine": 50,  "relief": 40 },
+    "need":     { "food": 200, "water": 180, "medicine": 40,  "relief": 60 }
+  },
+  {
+    "id": "camp-d",
+    "name": "Camp D",
+    "lat": 24.83,
+    "lng": 67.03,
+    "areaId": "area-a",
+    "capacity": 500,
+    "occupancy": 180,
+    "minReserve": { "food": 100, "water": 100, "medicine": 20, "relief": 30 },
+    "stock":    { "food": 800, "water": 700, "medicine": 120, "relief": 150 },
+    "need":     { "food": 300, "water": 250, "medicine": 45,  "relief": 80 }
+  }
+]

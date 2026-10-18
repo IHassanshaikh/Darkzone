@@ -1,0 +1,74 @@
+[
+  {
+    "id": "v-01",
+    "name": "Aisha Raza",
+    "skills": ["first-aid", "logistics"],
+    "availability": true,
+    "lat": 24.861,
+    "lng": 67.012,
+    "status": "available"
+  },
+  {
+    "id": "v-02",
+    "name": "Bilal Tariq",
+    "skills": ["field-verification", "navigation"],
+    "availability": true,
+    "lat": 24.875,
+    "lng": 67.020,
+    "status": "available"
+  },
+  {
+    "id": "v-03",
+    "name": "Sana Mahmood",
+    "skills": ["delivery", "driving"],
+    "availability": true,
+    "lat": 24.832,
+    "lng": 67.031,
+    "status": "on_duty"
+  },
+  {
+    "id": "v-04",
+    "name": "Hamza Ali",
+    "skills": ["medical", "first-aid"],
+    "availability": false,
+    "lat": 24.890,
+    "lng": 67.055,
+    "status": "on_duty"
+  },
+  {
+    "id": "v-05",
+    "name": "Zara Khan",
+    "skills": ["field-verification", "communication"],
+    "availability": true,
+    "lat": 24.915,
+    "lng": 67.082,
+    "status": "available"
+  },
+  {
+    "id": "v-06",
+    "name": "Usman Farooq",
+    "skills": ["logistics", "driving"],
+    "availability": true,
+    "lat": 24.848,
+    "lng": 67.008,
+    "status": "available"
+  },
+  {
+    "id": "v-07",
+    "name": "Fatima Sheikh",
+    "skills": ["medical", "community-liaison"],
+    "availability": false,
+    "lat": 24.903,
+    "lng": 67.098,
+    "status": "offline"
+  },
+  {
+    "id": "v-08",
+    "name": "Imran Hussain",
+    "skills": ["delivery", "logistics"],
+    "availability": true,
+    "lat": 24.868,
+    "lng": 67.042,
+    "status": "on_duty"
+  }
+]

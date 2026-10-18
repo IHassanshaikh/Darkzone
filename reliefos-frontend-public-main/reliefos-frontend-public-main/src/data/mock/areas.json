@@ -1,0 +1,44 @@
+[
+  {
+    "id": "area-a",
+    "name": "Area A",
+    "lat": 24.86,
+    "lng": 67.01,
+    "population": 1200,
+    "vulnerableShare": 0.20,
+    "hazardSeverity": 0.5,
+    "networkFailure": 0.1,
+    "actualReports": 8,
+    "lastReportAt": "2026-10-17T08:30:00Z",
+    "dataQuality": "ok",
+    "verification": "none"
+  },
+  {
+    "id": "area-b",
+    "name": "Area B",
+    "lat": 24.92,
+    "lng": 67.08,
+    "population": 600,
+    "vulnerableShare": 0.30,
+    "hazardSeverity": 0.7,
+    "networkFailure": 0.4,
+    "actualReports": 5,
+    "lastReportAt": "2026-10-17T06:15:00Z",
+    "dataQuality": "partial",
+    "verification": "none"
+  },
+  {
+    "id": "area-c",
+    "name": "Area C",
+    "lat": 24.90,
+    "lng": 67.10,
+    "population": 800,
+    "vulnerableShare": 0.35,
+    "hazardSeverity": 0.9,
+    "networkFailure": 1.0,
+    "actualReports": 1,
+    "lastReportAt": "2026-10-16T21:10:00Z",
+    "dataQuality": "ok",
+    "verification": "none"
+  }
+]
