@@ -154,66 +154,84 @@ html:not(.dark) .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]) {
   border-color: #f1f5f9 !important;
 }
 
-/* Authentic Typography Contrasts */
-html.light .text-slate-100,
-html:not(.dark) .text-slate-100 {
-  color: #0f172a !important;
+/* Authentic Typography Contrasts in Light Mode (only on standard light backgrounds, never in dark panels) */
+html.light :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not(.global-alert-popup):not(.mobile-toast):not(.citizen-mobile-app) > .text-slate-100,
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not(.global-alert-popup):not(.mobile-toast):not(.citizen-mobile-app) > .text-slate-100 {
+  color: #0f172a;
 }
 
-html.light .text-slate-200,
-html:not(.dark) .text-slate-200 {
-  color: #1e293b !important;
+html.light :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not(.global-alert-popup):not(.mobile-toast):not(.citizen-mobile-app) > .text-slate-200,
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not(.global-alert-popup):not(.mobile-toast):not(.citizen-mobile-app) > .text-slate-200 {
+  color: #1e293b;
 }
 
-html.light .text-slate-300,
-html:not(.dark) .text-slate-300 {
-  color: #334155 !important;
+html.light :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not(.global-alert-popup):not(.mobile-toast):not(.citizen-mobile-app) > .text-slate-300,
+html:not(.dark) :not([class*="bg-slate-950"]):not([class*="bg-slate-900"]):not(.global-alert-popup):not(.mobile-toast):not(.citizen-mobile-app) > .text-slate-300 {
+  color: #334155;
 }
 
 html.light .text-slate-400,
 html:not(.dark) .text-slate-400 {
-  color: #64748b !important;
+  color: #64748b;
 }
 
 html.light .text-slate-500,
 html:not(.dark) .text-slate-500 {
-  color: #64748b !important;
+  color: #64748b;
 }
 
 /* Headings in Light Mode (only when not explicitly given a light/white text color) */
-html.light h1:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html.light h2:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html.light h3:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html.light h4:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html.light h5:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html.light h6:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html:not(.dark) h1:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html:not(.dark) h2:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html:not(.dark) h3:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html:not(.dark) h4:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html:not(.dark) h5:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
-html:not(.dark) h6:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]) {
+html.light h1:not(.text-white),
+html.light h2:not(.text-white),
+html.light h3:not(.text-white),
+html.light h4:not(.text-white),
+html.light h5:not(.text-white),
+html.light h6:not(.text-white),
+html:not(.dark) h1:not(.text-white),
+html:not(.dark) h2:not(.text-white),
+html:not(.dark) h3:not(.text-white),
+html:not(.dark) h4:not(.text-white),
+html:not(.dark) h5:not(.text-white),
+html:not(.dark) h6:not(.text-white) {
   color: #0f172a;
   font-weight: 700;
 }
 
-/* Ensure .text-white is ALWAYS pure crisp white across ALL themes, buttons, cards, toasts, and headers */
+/* Explicit text-white class (pure crisp white) - never match dark:text-white in light mode */
 .text-white,
-.text-white *,
-[class*="text-white"],
+span.text-white,
+div.text-white,
+p.text-white,
+h1.text-white,
+h2.text-white,
+h3.text-white,
+h4.text-white,
 button.text-white,
+a.text-white,
 [role="button"].text-white,
 .brand-icon,
 .brand-icon * {
+  color: #ffffff;
+}
+
+/* Global Alert Popup & Mobile Toast Contrast Guarantee */
+.global-alert-popup,
+.global-alert-popup h3,
+.global-alert-popup span.alert-title,
+.mobile-toast,
+.mobile-toast * {
   color: #ffffff !important;
 }
 
-/* Mobile App & Tactical Surface Contrast Protection */
-.citizen-mobile-app .text-white,
-.citizen-mobile-app [class*="text-white"],
-.mobile-app .text-white,
-.mobile-toast,
-.mobile-toast * {
+.global-alert-popup p.alert-message {
+  color: #e2e8f0 !important;
+}
+
+.global-alert-popup button.alert-ack {
+  color: #cbd5e1 !important;
+}
+
+.global-alert-popup button.alert-ack:hover {
   color: #ffffff !important;
 }
 

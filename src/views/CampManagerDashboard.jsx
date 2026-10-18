@@ -107,9 +107,9 @@ export default function CampManagerDashboard() {
   const [reqPriority, setReqPriority] = useState('critical');
   const [reqNotes, setReqNotes] = useState('Water tanks severely depleted. Resupply urgently needed for 280 occupants.');
 
-  // Gemini 2.5 Flash Camp Intelligence State
+  // Gemini 2.5 Flash Camp Intelligence State (Concise & Tactical)
   const [aiCampForecast, setAiCampForecast] = useState(
-    'Gemini AI Camp Logistics Projection: At current occupancy of 280 residents, drinking water (320L) will deplete in 16.2 hours. Recommend emergency dispatch of 500L tanker from Depo North before 08:00. Trauma medicine is sufficient for 72 hours.'
+    'Water reserves (320L) critical in 16.2h under 280 residents. Priority: Dispatch 500L tanker before 08:00.'
   );
   const [isAiForecasting, setIsAiForecasting] = useState(false);
 
@@ -120,7 +120,7 @@ export default function CampManagerDashboard() {
     try {
       const res = await queryGeminiAI({
         task: 'camp_forecast',
-        prompt: `Analyze ${currentCamp.name}: Occupancy: ${currentCamp.occupancy}/${currentCamp.capacity}. Supplies: ${JSON.stringify(currentCamp.items || [])}. Forecast hours until critical depletion and suggest prioritized restock schedule.`,
+        prompt: `Analyze ${currentCamp.name} (Occupancy: ${currentCamp.occupancy}/${currentCamp.capacity}). Give ONLY 2 very short, concise tactical bullet points (under 25 words total) on depletion risk and priority restock. No fluff.`,
         context: { campId: currentCamp.id, occupancy: currentCamp.occupancy }
       });
       if (res?.response) {

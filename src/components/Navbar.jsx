@@ -93,18 +93,6 @@ export default function Navbar() {
         {/* Center / Right Control Panel */}
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
 
-          {/* DYNAMIC THEME COLOR ACCENT BUTTON (Changes theme color on every click) */}
-          <button
-            onClick={cycleThemeAccent}
-            id="btn-cycle-theme-color"
-            title="Click to dynamically cycle the theme color palette (Red, Amber, Emerald, Blue, Purple, Cyan)"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all hover:scale-105 active:scale-95"
-          >
-            <Palette className="w-3.5 h-3.5 text-slate-500" />
-            <span className={`w-2 h-2 rounded-full ${accentInfo.dot}`} />
-            <span className="hidden sm:inline text-[11px] font-bold uppercase">{themeAccent}</span>
-          </button>
-
           {/* Light / Dark Mode Toggle Button */}
           <button
             onClick={toggleTheme}
@@ -141,8 +129,8 @@ export default function Navbar() {
             )}
           </button>
 
-          {/* Pending Sync Badge */}
-          {pendingSyncCount > 0 ? (
+          {/* Pending Sync Badge (only shown when there are pending actions) */}
+          {pendingSyncCount > 0 && (
             <button
               onClick={syncNow}
               disabled={isSyncing}
@@ -151,16 +139,6 @@ export default function Navbar() {
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
               <span className="text-[11px]">Sync ({pendingSyncCount})</span>
-            </button>
-          ) : (
-            <button
-              onClick={syncNow}
-              disabled={isSyncing}
-              title="All actions synced"
-              className="hidden lg:flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-blue-600' : ''}`} />
-              <span className="text-[11px]">Synced</span>
             </button>
           )}
 

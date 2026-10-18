@@ -50,9 +50,9 @@ export default function VolunteerDashboard() {
   const [camps, setCamps] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Gemini 2.5 Flash Field Safety State
+  // Gemini 2.5 Flash Field Safety State (Concise & Tactical)
   const [aiSafetyAdvice, setAiSafetyAdvice] = useState(
-    'Gemini AI Field Safety Protocol: Area C flood surge active (+3.2 ft). If conducting welfare check or insulin delivery, avoid subterranean basement access. Maintain low-power mesh beacon pinging every 15 min. Carry water-purification tablets.'
+    'Area C flood surge active (+3.2 ft). Avoid subterranean basements; maintain low-power mesh beacon pinging every 15 min.'
   );
   const [isAiSafetyLoading, setIsAiSafetyLoading] = useState(false);
 
@@ -75,7 +75,7 @@ export default function VolunteerDashboard() {
     try {
       const res = await queryGeminiAI({
         task: 'citizen_advisor',
-        prompt: `Provide tactical responder safety instructions for volunteer ${currentVolunteerName} assigned to ${duties.length} field duties and ${citizenMessages.length} inbound citizen SOS calls. Keep it concise, practical, and directive.`,
+        prompt: `Provide ONLY 2 very brief responder safety rules (under 25 words total) for volunteer ${currentVolunteerName} in high flood zone. No filler text.`,
         context: { volunteerId: currentVolunteerId, dutiesCount: duties.length, messagesCount: citizenMessages.length }
       });
       if (res?.response) {
@@ -240,14 +240,14 @@ export default function VolunteerDashboard() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-white uppercase tracking-wider">
+                <h2 className="text-xs sm:text-sm font-black font-mono text-slate-900 dark:text-slate-100 uppercase tracking-wider">
                   GEMINI 2.5 FLASH // FIELD RESPONDER SAFETY ADVISOR
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
                   gemini-2.5-flash
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans mt-0.5">
                 Dynamic route hazard appraisal • Subterranean flood warnings • Offline mesh rendezvous
               </p>
             </div>
@@ -261,9 +261,9 @@ export default function VolunteerDashboard() {
             <span>{isAiSafetyLoading ? 'Scanning Hazards...' : 'Re-Check Route Hazards'}</span>
           </button>
         </div>
-        <div className="mt-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-lg p-3 border border-[#2D4A22]/20 flex items-start gap-2.5">
+        <div className="mt-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-lg p-3 border border-[#2D4A22]/20 flex items-start gap-2.5">
           <Bot className="w-4 h-4 text-[#2D4A22] dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-          <div className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-sans font-medium whitespace-pre-line">
+          <div className="text-xs text-slate-900 dark:text-slate-100 font-medium leading-relaxed font-sans whitespace-pre-line">
             {aiSafetyAdvice}
           </div>
         </div>
@@ -274,7 +274,7 @@ export default function VolunteerDashboard() {
         <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <Radio className="w-4 h-4 text-red-500 animate-pulse" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-slate-100 font-mono">
               INBOUND CITIZEN DISTRESS SOS // LIVE P2P MESH ({citizenMessages.length})
             </h2>
           </div>
@@ -294,27 +294,27 @@ export default function VolunteerDashboard() {
             {citizenMessages.map((msg) => (
               <div 
                 key={msg.id} 
-                className="p-3 rounded-lg border border-red-500/20 bg-red-50/50 dark:bg-red-950/20 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all hover:border-red-500/40"
+                className="p-3.5 rounded-lg border border-red-300 dark:border-red-800/80 bg-red-50/80 dark:bg-red-950/40 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all hover:border-red-400 shadow-xs"
               >
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-600 text-white uppercase tracking-wider">
                       {msg.category || 'CITIZEN SOS'}
                     </span>
-                    <span className="text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300">
+                    <span className="text-[11px] font-mono font-bold text-slate-900 dark:text-slate-200">
                       From: {msg.senderName || 'Affected Citizen'}
                     </span>
-                    <span className="text-[10px] font-mono text-slate-400">
+                    <span className="text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400">
                       • {new Date(msg.createdAt).toLocaleTimeString()}
                     </span>
                   </div>
 
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  <p className="text-sm font-black text-slate-950 dark:text-slate-50 leading-snug">
                     {msg.text}
                   </p>
 
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                    <span className="text-emerald-700 dark:text-emerald-400 font-bold">Mesh Route:</span>
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-700 dark:text-slate-300">
+                    <span className="text-emerald-800 dark:text-emerald-400 font-bold">Mesh Route:</span>
                     <span>{msg.hopRoute || 'Bluetooth Low Energy P2P Peer Mesh'}</span>
                   </div>
                 </div>
