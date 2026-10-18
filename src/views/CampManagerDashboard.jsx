@@ -290,13 +290,23 @@ export default function CampManagerDashboard() {
   };
 
   const handleApproveFieldRequisition = async (req) => {
+    // 1. Instant optimistic update so card flips to approved immediately
+    setFieldRequisitions(prev => prev.map(r => r.id === req.id ? { ...r, status: 'approved', updatedAt: new Date().toISOString() } : r));
     setActionLoading(true);
     try {
       await updateRequisitionAction(req.id, { status: 'approved' });
       showToast(`Requisition #${req.id.substr(-6)} APPROVED! Camp inventory deducted and delivery convoy queued.`, 'success');
-      await loadData();
+      const [freshReqs, freshDuties, freshCamps] = await Promise.all([
+        fetchRequisitions(),
+        fetchDuties(),
+        fetchCamps()
+      ]);
+      if (Array.isArray(freshReqs)) setFieldRequisitions(freshReqs);
+      if (Array.isArray(freshDuties)) setDuties(freshDuties);
+      if (Array.isArray(freshCamps)) setCamps(freshCamps);
     } catch (err) {
       showToast(`Approval failed: ${err.message}`, 'error');
+      await loadData();
     } finally {
       setActionLoading(false);
     }
@@ -717,7 +727,7 @@ export default function CampManagerDashboard() {
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {fieldRequisitions.map((req) => {
-              const isApproved = req.status === 'approved';
+              const isApproved = req.status === 'approved' || req.status === 'fulfilled';
               return (
                 <div key={req.id} className="py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
                   <div className="space-y-1">
@@ -727,7 +737,7 @@ export default function CampManagerDashboard() {
                       </span>
                       <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
                         isApproved
-                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
                           : req.priority === 'critical'
                           ? 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 animate-pulse'
                           : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
@@ -756,6 +766,7 @@ export default function CampManagerDashboard() {
                   <div className="flex items-center gap-2 self-start md:self-center flex-shrink-0">
                     {!isApproved ? (
                       <button
+                        type="button"
                         onClick={() => handleApproveFieldRequisition(req)}
                         disabled={actionLoading}
                         className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-600 to-amber-700 hover:brightness-110 text-white transition flex items-center gap-1.5 shadow-md shadow-amber-600/20"
@@ -764,8 +775,8 @@ export default function CampManagerDashboard() {
                         <span>Approve &amp; Dispatch Convoy</span>
                       </button>
                     ) : (
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                        <Truck className="w-4 h-4" /> Convoy Active
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                        <Truck className="w-4 h-4 text-emerald-500" /> Convoy Active &amp; Dispatched
                       </span>
                     )}
                   </div>

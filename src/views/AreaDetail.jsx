@@ -139,6 +139,8 @@ export default function AreaDetail({ id: propId }) {
   };
 
   const handleSendFieldTeam = async () => {
+    // 1. Instant optimistic update
+    setArea(prev => prev ? { ...prev, verification: 'team_sent' } : prev);
     setActionLoading(true);
     try {
       await sendFieldTeamAction(areaId, selectedVolunteers);
@@ -147,6 +149,7 @@ export default function AreaDetail({ id: propId }) {
       await loadArea();
     } catch (err) {
       showToast(`Action failed: ${err.message}`, 'error');
+      await loadArea();
     } finally {
       setActionLoading(false);
     }
@@ -782,12 +785,14 @@ export default function AreaDetail({ id: propId }) {
 
             <div className="flex items-center justify-end gap-3">
               <button
+                type="button"
                 onClick={() => setShowAssignModal(false)}
                 className="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleSendFieldTeam}
                 disabled={selectedVolunteers.length === 0 || actionLoading}
                 className="px-5 py-2 text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition"

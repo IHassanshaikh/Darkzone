@@ -138,21 +138,27 @@ export default function VolunteerDashboard() {
   }, []);
 
   const handleStatusChange = async (dutyId, nextStatus) => {
+    // 1. Instant optimistic update so badge and button change immediately
+    setDuties(prev => prev.map(d => d.id === dutyId ? { ...d, status: nextStatus, updatedAt: new Date().toISOString() } : d));
+
     if (!isOnline) {
       await enqueueAction({
         type: 'duty_status',
         payload: { dutyId, status: nextStatus },
         timestamp: new Date().toISOString()
       });
-      setDuties(prev => prev.map(d => d.id === dutyId ? { ...d, status: nextStatus } : d));
       showToast(`Offline action saved to IndexedDB! Pending sync badge incremented.`, 'warning');
     } else {
       try {
         await updateDutyStatusAction(dutyId, nextStatus);
-        showToast(`Duty status updated to ${nextStatus}.`, 'success');
-        await loadData();
+        showToast(`Duty status updated to ${nextStatus.replace('_', ' ')}.`, 'success');
+        const fresh = await fetchDuties();
+        if (Array.isArray(fresh) && fresh.length > 0) {
+          setDuties(fresh);
+        }
       } catch (err) {
         showToast(`Failed: ${err.message}`, 'error');
+        await loadData();
       }
     }
   };
@@ -465,6 +471,7 @@ export default function VolunteerDashboard() {
                 <div className="flex items-center gap-2 self-start md:self-center">
                   {isAssigned && (
                     <button
+                      type="button"
                       onClick={() => handleStatusChange(duty.id, 'in_progress')}
                       className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition flex items-center gap-1.5 shadow-md shadow-sky-600/30"
                     >
@@ -474,6 +481,7 @@ export default function VolunteerDashboard() {
                   )}
                   {isInProgress && (
                     <button
+                      type="button"
                       onClick={() => handleStatusChange(duty.id, 'done')}
                       className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-md shadow-emerald-600/30"
                     >

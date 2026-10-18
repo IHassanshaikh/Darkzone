@@ -268,6 +268,7 @@ class ServerDB {
         status: 'in_progress',
         priority: 'high',
         notes: `Fulfilling requisition ${req.id} for field responder ${req.volunteerName}.`,
+        instructions: `Deliver approved supplies from ${req.campName} to field sector.`,
         type: 'delivery',
         createdAt: new Date().toISOString()
       };
@@ -278,7 +279,8 @@ class ServerDB {
         type: 'requisition_approved',
         title: 'REQUISITION APPROVED',
         message: `Your supply request has been APPROVED by Camp Operations. Supplies are staged for pickup!`,
-        targetRole: 'volunteer',
+        targetRole: 'all',
+        targetRoles: ['all', 'volunteer', 'admin', 'coordinator'],
         targetVolunteerId: req.volunteerId,
         link: '/volunteer',
         meta: { requisitionId: req.id }

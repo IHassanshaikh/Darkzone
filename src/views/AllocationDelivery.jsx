@@ -94,12 +94,18 @@ export default function AllocationDelivery() {
   };
 
   const handleUpdateDeliveryStatus = async (dutyId, nextStatus) => {
+    // 1. Instant optimistic update
+    setDuties(prev => prev.map(d => d.id === dutyId ? { ...d, status: nextStatus, updatedAt: new Date().toISOString() } : d));
     try {
       await updateDutyStatusAction(dutyId, nextStatus);
-      showToast(`Delivery status updated to: ${nextStatus}.`, 'success');
-      await loadData();
+      showToast(`Delivery status updated to: ${nextStatus.replace('_', ' ')}.`, 'success');
+      const freshDuties = await fetchDuties();
+      if (Array.isArray(freshDuties)) {
+        setDuties(freshDuties.filter(d => d.type === 'delivery'));
+      }
     } catch (err) {
       showToast(`Failed to update status: ${err.message}`, 'error');
+      await loadData();
     }
   };
 
@@ -223,6 +229,7 @@ export default function AllocationDelivery() {
 
                 <div className="flex items-center gap-3 self-start md:self-center">
                   <button
+                    type="button"
                     onClick={() => handleApprove(sugg.suggestionId || sugg.id)}
                     disabled={approvingId === (sugg.suggestionId || sugg.id)}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors disabled:opacity-50"
@@ -342,6 +349,7 @@ export default function AllocationDelivery() {
                   <div className="flex items-center gap-2 self-start md:self-center">
                     {isPending && (
                       <button
+                        type="button"
                         onClick={() => handleUpdateDeliveryStatus(duty.id, 'in_progress')}
                         className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition flex items-center gap-1.5"
                       >
@@ -351,6 +359,7 @@ export default function AllocationDelivery() {
                     )}
                     {isInTransit && (
                       <button
+                        type="button"
                         onClick={() => handleUpdateDeliveryStatus(duty.id, 'done')}
                         className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5"
                       >

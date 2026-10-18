@@ -114,6 +114,8 @@ export default function VerificationView() {
 
   const handleDispatchTeam = async (areaId) => {
     const selected = selectedVolsMap[areaId] || ['vol-1', 'vol-4'];
+    // 1. Instant optimistic update so badge and button change immediately
+    setAreas(prev => prev.map(a => a.id === areaId ? { ...a, verification: 'team_sent' } : a));
     setIsSubmitting(true);
     try {
       await sendFieldTeamAction(areaId, selected);
@@ -121,12 +123,15 @@ export default function VerificationView() {
       await loadData();
     } catch (err) {
       showToast(`Dispatch failed: ${err.message}`, 'error');
+      await loadData();
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleConfirmArea = async (areaId) => {
+    // 1. Instant optimistic update
+    setAreas(prev => prev.map(a => a.id === areaId ? { ...a, verification: 'confirmed' } : a));
     setIsSubmitting(true);
     try {
       await verifyAreaAction(areaId, 'confirmed', 'Ground reconnaissance team verified critical distress.');
@@ -134,6 +139,7 @@ export default function VerificationView() {
       await loadData();
     } catch (err) {
       showToast(`Confirmation failed: ${err.message}`, 'error');
+      await loadData();
     } finally {
       setIsSubmitting(false);
     }
@@ -352,6 +358,7 @@ export default function VerificationView() {
 
                   <div className="flex items-center gap-1.5">
                     <button
+                      type="button"
                       onClick={() => setRejectArea(area)}
                       disabled={isSubmitting}
                       className="px-2.5 py-1 text-xs font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition-colors"
@@ -361,6 +368,7 @@ export default function VerificationView() {
 
                     {!isTeamSent ? (
                       <button
+                        type="button"
                         onClick={() => handleDispatchTeam(area.id)}
                         disabled={isSubmitting}
                         className="flex items-center gap-1 px-3 py-1 text-xs font-bold rounded bg-blue-600 hover:bg-blue-700 text-white transition-colors"
@@ -370,6 +378,7 @@ export default function VerificationView() {
                       </button>
                     ) : (
                       <button
+                        type="button"
                         onClick={() => handleConfirmArea(area.id)}
                         disabled={isSubmitting}
                         className="flex items-center gap-1 px-3 py-1 text-xs font-bold rounded bg-red-600 hover:bg-red-700 text-white transition-colors"

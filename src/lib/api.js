@@ -187,6 +187,50 @@ class LocalStore {
     const req = this.requisitions.find(r => r.id === id);
     if (!req) return null;
     Object.assign(req, updates, { updatedAt: new Date().toISOString() });
+
+    if (updates.status === 'approved') {
+      // Deduct stock from target camp in local store
+      const targetCamp = this.camps.find(c => c.id === req.campId);
+      if (targetCamp && targetCamp.items && req.items) {
+        req.items.forEach(reqItem => {
+          const targetName = (reqItem.item || reqItem.name || '').toLowerCase();
+          const campItem = targetCamp.items.find(i => (i.item || i.name || '').toLowerCase() === targetName);
+          if (campItem && campItem.stock !== undefined) {
+            campItem.stock = Math.max(0, campItem.stock - (Number(reqItem.quantity) || 0));
+          }
+        });
+        this.save('camps');
+      }
+
+      // Create delivery duty
+      const deliveryDuty = {
+        id: `duty-del-${Date.now()}`,
+        volunteerId: req.volunteerId,
+        volunteerName: req.volunteerName,
+        title: `SUPPLY CONVOY DISPATCH: ${req.campName}`,
+        location: req.campName,
+        status: 'in_progress',
+        priority: 'high',
+        notes: `Fulfilling requisition ${req.id} for field responder ${req.volunteerName}.`,
+        instructions: `Deliver approved supplies from ${req.campName} to field sector.`,
+        type: 'delivery',
+        createdAt: new Date().toISOString()
+      };
+      this.duties.unshift(deliveryDuty);
+      this.save('duties');
+
+      this.broadcastNotification({
+        type: 'requisition_approved',
+        title: 'REQUISITION APPROVED',
+        message: `Your supply request has been APPROVED by Camp Operations. Supplies are staged for pickup!`,
+        targetRole: 'all',
+        targetRoles: ['all', 'volunteer', 'admin', 'coordinator'],
+        targetVolunteerId: req.volunteerId,
+        link: '/volunteer',
+        meta: { requisitionId: req.id }
+      });
+    }
+
     this.save('requisitions');
     return req;
   }
@@ -577,7 +621,11 @@ export async function fetchDuties() {
       const res = await fetch(`${API_BASE}/duties`);
       if (res.ok) {
         const body = await res.json();
-        return body.data;
+        if (Array.isArray(body.data)) {
+          localStore.duties = body.data;
+          localStore.save('duties');
+          return body.data;
+        }
       }
     } catch {}
   }
@@ -585,6 +633,16 @@ export async function fetchDuties() {
 }
 
 export async function updateDutyStatusAction(dutyId, status) {
+  // 1. Optimistically update localStore right away
+  const duty = localStore.duties.find(d => d.id === dutyId || String(d.id).toLowerCase() === String(dutyId).toLowerCase());
+  if (duty) {
+    duty.status = status;
+    duty.updatedAt = new Date().toISOString();
+    localStore.logActivity('duty', `Duty #${duty.id.substr(-6)} status updated to ${status}.`);
+    localStore.save('duties');
+  }
+
+  // 2. Transmit to server
   if (await checkBackendHealth()) {
     try {
       const res = await fetch(`${API_BASE}/duties/${dutyId}/status`, {
@@ -594,17 +652,22 @@ export async function updateDutyStatusAction(dutyId, status) {
       });
       if (res.ok) {
         const body = await res.json();
-        return body.data;
+        if (body.data) {
+          const idx = localStore.duties.findIndex(d => d.id === dutyId || String(d.id).toLowerCase() === String(dutyId).toLowerCase());
+          if (idx !== -1) {
+            localStore.duties[idx] = body.data;
+          } else {
+            localStore.duties.unshift(body.data);
+          }
+          localStore.save('duties');
+          return body.data;
+        }
       }
-    } catch {}
+    } catch (err) {
+      console.warn('Network duty update failed, using local store:', err);
+    }
   }
 
-  const duty = localStore.duties.find(d => d.id === dutyId);
-  if (duty) {
-    duty.status = status;
-    duty.updatedAt = new Date().toISOString();
-    localStore.logActivity('duty', `Duty #${duty.id.substr(-6)} status updated to ${status}.`);
-  }
   return { success: true, duty };
 }
 
@@ -645,6 +708,10 @@ export async function approveAllocationAction(suggestionId) {
       });
       if (res.ok) {
         const body = await res.json();
+        if (body.data?.duty) {
+          localStore.duties.unshift(body.data.duty);
+          localStore.save('duties');
+        }
         return body.data;
       }
     } catch {}
@@ -674,8 +741,9 @@ export async function approveAllocationAction(suggestionId) {
     updatedAt: new Date().toISOString()
   };
 
-  localStore.duties.push(newDuty);
+  localStore.duties.unshift(newDuty);
   localStore.logActivity('allocation', `Transfer approved: ${suggestion.quantity} ${suggestion.item} from ${suggestion.fromCampName} to ${suggestion.toCampName}. Duty created as Pending.`);
+  localStore.save('duties');
 
   return {
     success: true,
@@ -1097,7 +1165,11 @@ export async function fetchRequisitions({ campId = null, volunteerId = null, sta
     const res = await fetch(`${API_BASE}/requisitions?${query.toString()}`);
     if (res.ok) {
       const json = await res.json();
-      return json.data;
+      if (Array.isArray(json.data)) {
+        localStore.requisitions = json.data;
+        localStore.save('requisitions');
+        return json.data;
+      }
     }
   } catch (err) {
     console.warn('Network requisition fetch failed, using local store:', err);
@@ -1113,6 +1185,10 @@ export async function fetchRequisitions({ campId = null, volunteerId = null, sta
  * Approve / Update Requisition Status
  */
 export async function updateRequisitionAction(id, { status, notes }) {
+  // 1. Optimistically update localStore right away so any sync UI immediately reflects the new status
+  const localReq = localStore.updateRequisition(id, { status, notes });
+
+  // 2. Transmit to server API
   try {
     const res = await fetch(`${API_BASE}/requisitions/${id}`, {
       method: 'PATCH',
@@ -1121,12 +1197,19 @@ export async function updateRequisitionAction(id, { status, notes }) {
     });
     if (res.ok) {
       const json = await res.json();
-      return json.data;
+      if (json.data) {
+        const idx = localStore.requisitions.findIndex(r => r.id === id);
+        if (idx !== -1) {
+          localStore.requisitions[idx] = json.data;
+        }
+        localStore.save('requisitions');
+        return json.data;
+      }
     }
   } catch (err) {
-    console.warn('Network requisition update failed, updating local store:', err);
+    console.warn('Network requisition update failed, using local store:', err);
   }
-  return localStore.updateRequisition(id, { status, notes });
+  return localReq;
 }
 
 /**

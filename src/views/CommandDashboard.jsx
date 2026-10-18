@@ -100,12 +100,15 @@ export default function CommandDashboard() {
   }, []);
 
   const handleQuickFieldTeam = async (areaId) => {
+    // 1. Instant optimistic update
+    setAreas(prev => prev.map(a => a.id === areaId ? { ...a, verification: 'team_sent' } : a));
     try {
       await sendFieldTeamAction(areaId, ['vol-1', 'vol-4']);
       showToast('Field Team dispatched to Area C. Status upgraded to team_sent.', 'success');
       loadData();
     } catch (err) {
       showToast(`Action failed: ${err.message}`, 'error');
+      loadData();
     }
   };
 
@@ -408,6 +411,7 @@ export default function CommandDashboard() {
                         Telemetry
                       </button>
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleQuickFieldTeam(item.refId);

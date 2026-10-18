@@ -4,8 +4,14 @@ import { db } from '../../_db';
 // PATCH /api/v1/requisitions/[id] - Approve or update status of a requisition
 export async function PATCH(request, context) {
   try {
-    const { id } = await context.params;
-    const body = await request.json();
+    const resolvedParams = context?.params ? await context.params : {};
+    const id = resolvedParams.id;
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      body = {};
+    }
     const { status, notes } = body;
 
     const updated = db.updateRequisition(id, { status, notes });
