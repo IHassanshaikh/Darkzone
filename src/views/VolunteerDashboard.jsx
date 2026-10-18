@@ -111,13 +111,23 @@ export default function VolunteerDashboard() {
 
   useEffect(() => {
     loadData();
-    // Real-time polling every 3 seconds for inbound citizen messages and duty dispatches
-    const interval = setInterval(() => {
+    const handleSync = () => {
       fetchMessages({ volunteerId: currentVolunteerId }).then(setCitizenMessages).catch(() => {});
       fetchDuties().then(setDuties).catch(() => {});
-    }, 3000);
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('reliefos_db_sync', handleSync);
+      window.addEventListener('storage', handleSync);
+    }
+    const interval = setInterval(handleSync, 3000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('reliefos_db_sync', handleSync);
+        window.removeEventListener('storage', handleSync);
+      }
+      clearInterval(interval);
+    };
   }, []);
 
   const handleStatusChange = async (dutyId, nextStatus) => {

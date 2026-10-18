@@ -1,0 +1,536 @@
+{
+  "messages": [
+    {
+      "id": "msg-1792340993875",
+      "sender": "user",
+      "senderName": "Citizen Mobile",
+      "recipientId": "vol-3",
+      "recipientName": "Fatima Noor (Volunteer)",
+      "text": "Verified Persistent Message Across Reloads",
+      "category": "Rescue Needed",
+      "hopRoute": "P2P Bluetooth Low Energy Mesh",
+      "status": "delivered",
+      "timestamp": "09:29 PM",
+      "createdAt": "2026-10-18T16:29:53.875Z"
+    },
+    {
+      "id": "msg-seed-1",
+      "sender": "user",
+      "senderName": "Citizen (Khanpur Valley)",
+      "recipientId": "vol-1",
+      "recipientName": "Sara Khan",
+      "text": "Water entered ground floor, emergency boat requested for 4 citizens.",
+      "category": "Rescue Needed",
+      "timestamp": "08:29 PM",
+      "status": "relayed_hq",
+      "hopRoute": "Your Phone -> Peer Mobile (14m) -> Sara Khan -> HQ",
+      "createdAt": "2026-10-18T15:29:53.727Z"
+    },
+    {
+      "id": "msg-seed-2",
+      "sender": "volunteer",
+      "senderName": "Sara Khan (Volunteer)",
+      "recipientId": "user",
+      "recipientName": "Citizen (Khanpur Valley)",
+      "text": "Copy that! Received your packet via 2-hop mobile relay. Rescue boat en route from Camp 3.",
+      "category": "Rescue Confirmation",
+      "timestamp": "08:34 PM",
+      "status": "delivered",
+      "createdAt": "2026-10-18T15:34:53.728Z"
+    }
+  ],
+  "requisitions": [
+    {
+      "id": "req-seed-1",
+      "volunteerId": "vol-3",
+      "volunteerName": "Fatima Noor",
+      "campId": "camp-b",
+      "campName": "Camp B (Coastal School)",
+      "items": [
+        {
+          "item": "water",
+          "quantity": 60,
+          "unit": "Liters"
+        },
+        {
+          "item": "medicine",
+          "quantity": 15,
+          "unit": "Trauma Packs"
+        }
+      ],
+      "priority": "critical",
+      "notes": "Area C flood surge: 12 elderly residents require sterile dressing and hydration.",
+      "status": "pending",
+      "createdAt": "2026-10-18T15:59:53.728Z",
+      "updatedAt": "2026-10-18T15:59:53.728Z"
+    }
+  ],
+  "duties": [
+    {
+      "id": "duty-sos-1792340993875",
+      "volunteerId": "vol-3",
+      "volunteerName": "Fatima Noor (Volunteer)",
+      "title": "EMERGENCY DISPATCH: Rescue Needed",
+      "location": "Area C (Delta Sector)",
+      "areaId": "area-c",
+      "status": "assigned",
+      "priority": "critical",
+      "notes": "Distress text: \"Verified Persistent Message Across Reloads\". Route: P2P Bluetooth Low Energy Mesh",
+      "type": "rescue",
+      "createdAt": "2026-10-18T16:29:53.875Z"
+    },
+    {
+      "id": "duty-1",
+      "volunteerId": "vol-3",
+      "volunteerName": "Fatima Noor",
+      "type": "verification",
+      "fromCampId": "camp-b",
+      "toType": "area",
+      "toId": "area-b",
+      "toName": "Area B (South Lowlands)",
+      "item": null,
+      "quantity": null,
+      "status": "in_progress",
+      "instructions": "Inspect road flooding and verify sensor reports in Sector 4.",
+      "createdAt": "2026-10-18T01:30:00Z",
+      "updatedAt": "2026-10-18T02:00:00Z"
+    },
+    {
+      "id": "duty-2",
+      "volunteerId": "vol-5",
+      "volunteerName": "Ayesha Bilal",
+      "type": "support",
+      "fromCampId": "camp-c",
+      "toType": "camp",
+      "toId": "camp-c",
+      "toName": "Camp C (Hilltop Center)",
+      "item": null,
+      "quantity": null,
+      "status": "in_progress",
+      "instructions": "Assist medical team with pediatric check-ups and intake registration.",
+      "createdAt": "2026-10-18T01:45:00Z",
+      "updatedAt": "2026-10-18T02:10:00Z"
+    },
+    {
+      "id": "duty-3",
+      "volunteerId": "vol-1",
+      "volunteerName": "Sarah Khan",
+      "type": "delivery",
+      "fromCampId": "camp-a",
+      "toType": "camp",
+      "toId": "camp-c",
+      "toName": "Camp C (Hilltop Center)",
+      "item": "food",
+      "quantity": 50,
+      "status": "done",
+      "instructions": "Delivered 50 dry food packs from Stadium Camp to Hilltop.",
+      "createdAt": "2026-10-17T23:00:00Z",
+      "updatedAt": "2026-10-18T01:15:00Z"
+    },
+    {
+      "id": "duty-4",
+      "volunteerId": "vol-2",
+      "volunteerName": "Ahmed Raza",
+      "type": "delivery",
+      "fromCampId": "camp-d",
+      "toType": "camp",
+      "toId": "camp-a",
+      "toName": "Camp A (Main Stadium)",
+      "item": "medicine",
+      "quantity": 30,
+      "status": "done",
+      "instructions": "Delivered emergency pediatric antibiotics.",
+      "createdAt": "2026-10-17T22:30:00Z",
+      "updatedAt": "2026-10-18T00:45:00Z"
+    },
+    {
+      "id": "duty-5",
+      "volunteerId": "vol-6",
+      "volunteerName": "Hamza Malik",
+      "type": "support",
+      "fromCampId": "camp-a",
+      "toType": "camp",
+      "toId": "camp-a",
+      "toName": "Camp A (Main Stadium)",
+      "item": null,
+      "quantity": null,
+      "status": "assigned",
+      "instructions": "Setup secondary backup diesel generator at South Wing.",
+      "createdAt": "2026-10-18T02:20:00Z",
+      "updatedAt": "2026-10-18T02:20:00Z"
+    },
+    {
+      "id": "duty-6",
+      "volunteerId": "vol-8",
+      "volunteerName": "Usman Farooq",
+      "type": "verification",
+      "fromCampId": "camp-d",
+      "toType": "area",
+      "toId": "area-a",
+      "toName": "Area A (Riverbank North)",
+      "item": null,
+      "quantity": null,
+      "status": "assigned",
+      "instructions": "Fly drone survey along embankment to measure rising water crest.",
+      "createdAt": "2026-10-18T02:35:00Z",
+      "updatedAt": "2026-10-18T02:35:00Z"
+    }
+  ],
+  "camps": [
+    {
+      "id": "camp-a",
+      "name": "Camp A (Main Stadium)",
+      "lat": 24.872,
+      "lng": 67.03,
+      "capacity": 500,
+      "occupancy": 420,
+      "minReserve": 50,
+      "type": "camp",
+      "updatedAt": "2026-10-18T01:00:00Z",
+      "items": [
+        {
+          "item": "water",
+          "stock": 400,
+          "need": 350
+        },
+        {
+          "item": "food",
+          "stock": 600,
+          "need": 500
+        },
+        {
+          "item": "medicine",
+          "stock": 150,
+          "need": 100
+        },
+        {
+          "item": "relief",
+          "stock": 200,
+          "need": 150
+        }
+      ]
+    },
+    {
+      "id": "camp-b",
+      "name": "Camp B (Coastal School)",
+      "lat": 24.835,
+      "lng": 67.025,
+      "capacity": 300,
+      "occupancy": 280,
+      "minReserve": 40,
+      "type": "camp",
+      "updatedAt": "2026-10-18T01:15:00Z",
+      "items": [
+        {
+          "item": "water",
+          "stock": 20,
+          "need": 180
+        },
+        {
+          "item": "food",
+          "stock": 220,
+          "need": 200
+        },
+        {
+          "item": "medicine",
+          "stock": 80,
+          "need": 75
+        },
+        {
+          "item": "relief",
+          "stock": 100,
+          "need": 90
+        }
+      ]
+    },
+    {
+      "id": "camp-c",
+      "name": "Camp C (Hilltop Center)",
+      "lat": 24.91,
+      "lng": 67.05,
+      "capacity": 250,
+      "occupancy": 190,
+      "minReserve": 30,
+      "type": "camp",
+      "updatedAt": "2026-10-18T02:00:00Z",
+      "items": [
+        {
+          "item": "water",
+          "stock": 150,
+          "need": 140
+        },
+        {
+          "item": "food",
+          "stock": 180,
+          "need": 150
+        },
+        {
+          "item": "medicine",
+          "stock": 90,
+          "need": 80
+        },
+        {
+          "item": "relief",
+          "stock": 80,
+          "need": 70
+        }
+      ]
+    },
+    {
+      "id": "camp-d",
+      "name": "Camp D (East Warehouse)",
+      "lat": 24.845,
+      "lng": 67.06,
+      "capacity": 400,
+      "occupancy": 150,
+      "minReserve": 50,
+      "type": "camp",
+      "updatedAt": "2026-10-18T01:30:00Z",
+      "items": [
+        {
+          "item": "water",
+          "stock": 350,
+          "need": 100
+        },
+        {
+          "item": "food",
+          "stock": 300,
+          "need": 120
+        },
+        {
+          "item": "medicine",
+          "stock": 120,
+          "need": 50
+        },
+        {
+          "item": "relief",
+          "stock": 250,
+          "need": 100
+        }
+      ]
+    }
+  ],
+  "reports": [
+    {
+      "id": "rep-001",
+      "areaId": "area-c",
+      "text": "Water entered ground floor, grandma cannot walk, need evacuation boat quickly near delta bridge.",
+      "source": "mesh",
+      "label": "Suggested",
+      "extracted": {
+        "age": "elderly",
+        "mobilityIssue": "Yes (cannot walk)",
+        "hazard": "Flooding (ground floor submerged)",
+        "urgency": "Critical",
+        "assistanceNeeded": "Evacuation boat & medical stretcher"
+      },
+      "clientId": "mesh-hop-101",
+      "createdAt": "2026-10-18T00:28:00Z"
+    },
+    {
+      "id": "rep-002",
+      "areaId": "area-a",
+      "text": "Flood water approaching main market street. Embankment sandbags holding for now.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "adult",
+        "mobilityIssue": "No",
+        "hazard": "Rising flood crest",
+        "urgency": "Medium",
+        "assistanceNeeded": "Sandbags & reinforcement"
+      },
+      "clientId": "web-rep-202",
+      "createdAt": "2026-10-18T02:30:00Z"
+    },
+    {
+      "id": "rep-003",
+      "areaId": "area-b",
+      "text": "School roof shelter full. 45 people waiting, need drinking water and infant formula.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "all ages (infants present)",
+        "mobilityIssue": "Not found",
+        "hazard": "Overcrowded shelter isolation",
+        "urgency": "High",
+        "assistanceNeeded": "Drinking water, baby milk formula"
+      },
+      "clientId": "web-rep-203",
+      "createdAt": "2026-10-18T02:10:00Z"
+    },
+    {
+      "id": "rep-004",
+      "areaId": "area-a",
+      "text": "Road clear between Sector 2 and Camp A. Trucks can pass safely.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "adult",
+        "mobilityIssue": "No",
+        "hazard": "Clear passage",
+        "urgency": "Low",
+        "assistanceNeeded": "Route clearance confirmation"
+      },
+      "clientId": "web-rep-204",
+      "createdAt": "2026-10-18T02:00:00Z"
+    },
+    {
+      "id": "rep-005",
+      "areaId": "area-b",
+      "text": "Power lines downed on 3rd cross road. Sparking noticed near puddle.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "Not found",
+        "mobilityIssue": "Not found",
+        "hazard": "Electrical shock hazard / downed grid",
+        "urgency": "High",
+        "assistanceNeeded": "Utility isolation / power shutdown"
+      },
+      "clientId": "web-rep-205",
+      "createdAt": "2026-10-18T01:50:00Z"
+    },
+    {
+      "id": "rep-006",
+      "areaId": "area-a",
+      "text": "5 families evacuated from riverside shanties, now safely at Camp A.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "families",
+        "mobilityIssue": "No",
+        "hazard": "Evacuation complete",
+        "urgency": "Low",
+        "assistanceNeeded": "Shelter registration"
+      },
+      "clientId": "web-rep-206",
+      "createdAt": "2026-10-18T01:40:00Z"
+    },
+    {
+      "id": "rep-007",
+      "areaId": "area-a",
+      "text": "Requesting 20 blankets and dry rations for community hall.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "Not found",
+        "mobilityIssue": "Not found",
+        "hazard": "Cold weather exposure",
+        "urgency": "Medium",
+        "assistanceNeeded": "Blankets and dry food ration packs"
+      },
+      "clientId": "web-rep-207",
+      "createdAt": "2026-10-18T01:25:00Z"
+    },
+    {
+      "id": "rep-008",
+      "areaId": "area-b",
+      "text": "Basement clinic pump failure. Stored insulin at risk of warming.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "Not found",
+        "mobilityIssue": "Not found",
+        "hazard": "Cold chain failure for insulin",
+        "urgency": "High",
+        "assistanceNeeded": "Ice packs / battery backup cold storage"
+      },
+      "clientId": "web-rep-208",
+      "createdAt": "2026-10-18T01:10:00Z"
+    },
+    {
+      "id": "rep-009",
+      "areaId": "area-a",
+      "text": "Volunteer team arrived at North Bridge checkpoint.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "volunteers",
+        "mobilityIssue": "No",
+        "hazard": "Operational status",
+        "urgency": "Low",
+        "assistanceNeeded": "Status logging"
+      },
+      "clientId": "web-rep-209",
+      "createdAt": "2026-10-18T00:55:00Z"
+    },
+    {
+      "id": "rep-010",
+      "areaId": "area-b",
+      "text": "Flood water receding on western perimeter. Road passable by 4x4.",
+      "source": "web",
+      "label": "Suggested",
+      "extracted": {
+        "age": "Not found",
+        "mobilityIssue": "No",
+        "hazard": "Receding water",
+        "urgency": "Low",
+        "assistanceNeeded": "Route assessment"
+      },
+      "clientId": "web-rep-210",
+      "createdAt": "2026-10-18T00:40:00Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-1792340993875-t2yc",
+      "type": "sos_message",
+      "title": "EMERGENCY ALERT // RESCUE NEEDED",
+      "message": "From Citizen Mobile: \"Verified Persistent Message Across Reloads\"",
+      "targetRole": "volunteer",
+      "targetRoles": [
+        "volunteer"
+      ],
+      "targetVolunteerId": "vol-3",
+      "link": "/volunteer",
+      "acknowledged": false,
+      "timestamp": "2026-10-18T16:29:53.876Z",
+      "meta": {
+        "messageId": "msg-1792340993875",
+        "dutyId": "duty-sos-1792340993875"
+      }
+    },
+    {
+      "id": "notif-seed-1",
+      "type": "sos_message",
+      "title": "Emergency SOS Incoming",
+      "message": "Citizen in Area C reported ground floor flooding (+3ft). Assigned to Scout team.",
+      "targetRole": "all",
+      "targetVolunteerId": "vol-1",
+      "link": "/volunteer",
+      "acknowledged": false,
+      "timestamp": "2026-10-18T15:59:53.728Z"
+    }
+  ],
+  "activityLog": [
+    {
+      "id": 1792340993876,
+      "kind": "citizen_sos",
+      "message": "Citizen SOS dispatched to Fatima Noor (Volunteer): \"Verified Persistent Message Across Reloads...\"",
+      "timestamp": "2026-10-18T16:29:53.876Z",
+      "label": "Urgent"
+    },
+    {
+      "id": 1,
+      "kind": "system",
+      "message": "ReliefOS Next.js API Route Handlers active.",
+      "timestamp": "2026-10-18T16:29:53.728Z",
+      "label": null
+    },
+    {
+      "id": 2,
+      "kind": "dark_zone",
+      "message": "Potential Dark Zone flagged in Delta Sector 9 (Area C) based on 98% reporting silence.",
+      "timestamp": "2026-10-18T16:29:53.728Z",
+      "label": "Suggested"
+    },
+    {
+      "id": 3,
+      "kind": "shortage",
+      "message": "Critical water shortage detected at Camp B (Coastal School). Deficit: 160L.",
+      "timestamp": "2026-10-18T16:29:53.728Z",
+      "label": "Suggested"
+    }
+  ]
+}

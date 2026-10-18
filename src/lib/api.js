@@ -16,15 +16,35 @@ import initialReports from '../data/mock/reports.json';
 
 const API_BASE = (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_URL) || '/api/v1';
 
-// In-Memory state store for mock / offline fallback
+function loadStoredArray(key, fallback) {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveStoredArray(key, val) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
+    window.dispatchEvent(new CustomEvent('reliefos_db_sync', { detail: { key } }));
+  } catch {}
+}
+
+// Persistent state store for mock / offline fallback and cross-tab reactive state
 class LocalStore {
   constructor() {
     this.areas = JSON.parse(JSON.stringify(initialAreas));
-    this.camps = JSON.parse(JSON.stringify(initialCamps));
+    this.camps = loadStoredArray('reliefos_db_camps', JSON.parse(JSON.stringify(initialCamps)));
     this.volunteers = JSON.parse(JSON.stringify(initialVolunteers));
-    this.duties = JSON.parse(JSON.stringify(initialDuties));
-    this.reports = JSON.parse(JSON.stringify(initialReports));
-    this.messages = [
+    this.duties = loadStoredArray('reliefos_db_duties', JSON.parse(JSON.stringify(initialDuties)));
+    this.reports = loadStoredArray('reliefos_db_reports', JSON.parse(JSON.stringify(initialReports)));
+    this.messages = loadStoredArray('reliefos_db_messages', [
       {
         id: 'msg-seed-1',
         sender: 'user',
@@ -38,8 +58,8 @@ class LocalStore {
         hopRoute: 'Your Phone -> Peer Mobile (14m) -> Fatima Noor -> HQ',
         createdAt: new Date(Date.now() - 3600000).toISOString()
       }
-    ];
-    this.requisitions = [
+    ]);
+    this.requisitions = loadStoredArray('reliefos_db_requisitions', [
       {
         id: 'req-seed-1',
         volunteerId: 'vol-3',
@@ -56,14 +76,23 @@ class LocalStore {
         createdAt: new Date(Date.now() - 1800000).toISOString(),
         updatedAt: new Date(Date.now() - 1800000).toISOString()
       }
-    ];
-    this.notifications = [];
+    ]);
+    this.notifications = loadStoredArray('reliefos_db_notifications', []);
     this.activityLog = [
       { id: 1, kind: 'system', message: 'ReliefOS core monitoring engines initialized.', timestamp: new Date(Date.now() - 3600000).toISOString(), label: null },
       { id: 2, kind: 'dark_zone', message: 'Potential Dark Zone flagged in Delta Sector 9 (Area C) based on 98% reporting silence.', timestamp: new Date(Date.now() - 1800000).toISOString(), label: 'Suggested' },
       { id: 3, kind: 'shortage', message: 'Critical water shortage detected at Camp B (Coastal School). Deficit: 160L.', timestamp: new Date(Date.now() - 900000).toISOString(), label: 'Suggested' }
     ];
     this.isMockActive = true;
+  }
+
+  save(key) {
+    if (key === 'messages') saveStoredArray('reliefos_db_messages', this.messages);
+    if (key === 'requisitions') saveStoredArray('reliefos_db_requisitions', this.requisitions);
+    if (key === 'camps') saveStoredArray('reliefos_db_camps', this.camps);
+    if (key === 'duties') saveStoredArray('reliefos_db_duties', this.duties);
+    if (key === 'reports') saveStoredArray('reliefos_db_reports', this.reports);
+    if (key === 'notifications') saveStoredArray('reliefos_db_notifications', this.notifications);
   }
 
   logActivity(kind, message, label = 'Suggested') {
@@ -118,7 +147,9 @@ class LocalStore {
         targetVolunteerId: msg.recipientId,
         link: '/volunteer'
       });
+      this.save('duties');
     }
+    this.save('messages');
     return msg;
   }
 
@@ -146,6 +177,7 @@ class LocalStore {
       link: '/camp-manager'
     });
 
+    this.save('requisitions');
     return req;
   }
 
@@ -153,6 +185,7 @@ class LocalStore {
     const req = this.requisitions.find(r => r.id === id);
     if (!req) return null;
     Object.assign(req, updates, { updatedAt: new Date().toISOString() });
+    this.save('requisitions');
     return req;
   }
 
@@ -981,6 +1014,8 @@ export async function queryGeminiAI({ prompt, task = 'chat', context = {} }) {
  * Send Citizen SOS Message to Volunteer
  */
 export async function sendMessageAction(messageData) {
+  // Always save to persistent local store first so UI and reloads are immediately synchronized
+  const localSaved = localStore.addMessage(messageData);
   try {
     const res = await fetch(`${API_BASE}/messages`, {
       method: 'POST',
@@ -989,12 +1024,12 @@ export async function sendMessageAction(messageData) {
     });
     if (res.ok) {
       const json = await res.json();
-      return json.data;
+      return json.data || localSaved;
     }
   } catch (err) {
-    console.warn('Network message send failed, saving to local store:', err);
+    console.warn('Network message send failed, saved to persistent local store:', err);
   }
-  return localStore.addMessage(messageData);
+  return localSaved;
 }
 
 /**
@@ -1008,13 +1043,23 @@ export async function fetchMessages({ volunteerId = null, recipient = null } = {
     const res = await fetch(`${API_BASE}/messages?${query.toString()}`);
     if (res.ok) {
       const json = await res.json();
-      return json.data;
+      if (Array.isArray(json.data)) {
+        json.data.forEach(srvMsg => {
+          if (!localStore.messages.some(m => m.id === srvMsg.id)) {
+            localStore.messages.unshift(srvMsg);
+          }
+        });
+        localStore.save('messages');
+        return json.data;
+      }
     }
   } catch (err) {
     console.warn('Network message fetch failed, using local store:', err);
   }
   let msgs = [...localStore.messages];
-  if (volunteerId) msgs = msgs.filter(m => m.recipientId === volunteerId || m.sender === volunteerId);
+  if (volunteerId) {
+    msgs = msgs.filter(m => m.recipientId === volunteerId || m.sender === volunteerId || m.sender === 'user' || m.sender === 'citizen');
+  }
   return msgs;
 }
 

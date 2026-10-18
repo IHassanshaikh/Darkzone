@@ -88,6 +88,49 @@ class ServerDB {
       { id: 2, kind: 'dark_zone', message: 'Potential Dark Zone flagged in Delta Sector 9 (Area C) based on 98% reporting silence.', timestamp: new Date().toISOString(), label: 'Suggested' },
       { id: 3, kind: 'shortage', message: 'Critical water shortage detected at Camp B (Coastal School). Deficit: 160L.', timestamp: new Date().toISOString(), label: 'Suggested' }
     ];
+
+    // Load persisted data from disk if available
+    this.loadFromDisk();
+  }
+
+  saveToDisk() {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const dbFile = path.join(process.cwd(), 'src', 'data', 'db_live_state.json');
+      const data = {
+        messages: this.messages,
+        requisitions: this.requisitions,
+        duties: this.duties,
+        camps: this.camps,
+        reports: this.reports,
+        notifications: this.notifications,
+        activityLog: this.activityLog
+      };
+      fs.writeFileSync(dbFile, JSON.stringify(data, null, 2), 'utf8');
+    } catch (err) {
+      // Ignore if write restricted
+    }
+  }
+
+  loadFromDisk() {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const dbFile = path.join(process.cwd(), 'src', 'data', 'db_live_state.json');
+      if (fs.existsSync(dbFile)) {
+        const raw = fs.readFileSync(dbFile, 'utf8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.messages) && parsed.messages.length > 0) this.messages = parsed.messages;
+        if (Array.isArray(parsed.requisitions) && parsed.requisitions.length > 0) this.requisitions = parsed.requisitions;
+        if (Array.isArray(parsed.duties) && parsed.duties.length > 0) this.duties = parsed.duties;
+        if (Array.isArray(parsed.camps) && parsed.camps.length > 0) this.camps = parsed.camps;
+        if (Array.isArray(parsed.reports) && parsed.reports.length > 0) this.reports = parsed.reports;
+        if (Array.isArray(parsed.notifications)) this.notifications = parsed.notifications;
+      }
+    } catch (err) {
+      // Ignore if load fails
+    }
   }
 
   logActivity(kind, message, label = 'Suggested') {
@@ -154,6 +197,7 @@ class ServerDB {
       );
     }
 
+    this.saveToDisk();
     return msg;
   }
 
@@ -190,6 +234,7 @@ class ServerDB {
       'Suggested'
     );
 
+    this.saveToDisk();
     return req;
   }
 
@@ -245,6 +290,7 @@ class ServerDB {
       );
     }
 
+    this.saveToDisk();
     return req;
   }
 
@@ -291,6 +337,7 @@ class ServerDB {
     const notif = this.notifications.find(n => n.id === id);
     if (notif) {
       notif.acknowledged = true;
+      this.saveToDisk();
       return true;
     }
     return false;

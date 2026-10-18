@@ -10,7 +10,7 @@ export async function GET(request) {
 
     let results = [...db.messages];
     if (volunteerId) {
-      results = results.filter(m => m.recipientId === volunteerId || m.sender === volunteerId);
+      results = results.filter(m => m.recipientId === volunteerId || m.sender === volunteerId || m.sender === 'user' || m.sender === 'citizen');
     }
     if (recipient) {
       results = results.filter(m => m.recipientName?.toLowerCase().includes(recipient.toLowerCase()) || m.recipientId === recipient);

@@ -157,8 +157,7 @@ export default function CampManagerDashboard() {
 
   useEffect(() => {
     loadData();
-    // 3s interval polling for volunteer requisitions and convoy duties
-    const interval = setInterval(async () => {
+    const handleSync = async () => {
       try {
         const [campsData, reqsData, dutiesData] = await Promise.all([
           fetchCamps(),
@@ -168,12 +167,21 @@ export default function CampManagerDashboard() {
         setCamps(campsData);
         setFieldRequisitions(reqsData || []);
         setDuties(dutiesData);
-      } catch (err) {
-        // silent fallback
-      }
-    }, 3000);
+      } catch (err) {}
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('reliefos_db_sync', handleSync);
+      window.addEventListener('storage', handleSync);
+    }
+    const interval = setInterval(handleSync, 3000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('reliefos_db_sync', handleSync);
+        window.removeEventListener('storage', handleSync);
+      }
+      clearInterval(interval);
+    };
   }, []);
 
   const currentCamp = useMemo(() => {

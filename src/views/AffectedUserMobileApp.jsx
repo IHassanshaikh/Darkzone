@@ -41,7 +41,7 @@ import {
   RefreshCw,
   Bot
 } from 'lucide-react';
-import { submitReportAction, sendMessageAction, queryGeminiAI } from '../lib/api';
+import { submitReportAction, sendMessageAction, fetchMessages, queryGeminiAI } from '../lib/api';
 
 // Dynamically import Leaflet map with ssr: false
 const MobileOfflineMap = dynamic(() => import('../components/MobileOfflineMap'), {
@@ -62,9 +62,9 @@ const DEFAULT_USER_LOCATION = {
 
 const NEARBY_VOLUNTEERS = [
   {
-    id: 'vol-1',
-    name: 'Sara Khan',
-    role: 'Field Volunteer & Scout',
+    id: 'vol-3',
+    name: 'Fatima Noor',
+    role: 'Triage Scout & Field Responder',
     lat: 24.8632,
     lng: 67.0352,
     distanceMeters: 120,
@@ -74,9 +74,9 @@ const NEARBY_VOLUNTEERS = [
     bleSignal: '-58 dBm (Direct Range)'
   },
   {
-    id: 'vol-4',
-    name: 'Alex Rivera',
-    role: 'Search & Recon Scout',
+    id: 'vol-1',
+    name: 'Sara Khan',
+    role: 'Field Volunteer & Scout',
     lat: 24.8650,
     lng: 67.0320,
     distanceMeters: 340,
@@ -184,7 +184,7 @@ export default function AffectedUserMobileApp() {
     setIsGeneratingForecast(false);
   };
 
-  // Message thread state
+  // Persistent Message thread state
   const [messages, setMessages] = useState([
     {
       id: 'msg-seed-1',
@@ -193,19 +193,58 @@ export default function AffectedUserMobileApp() {
       category: 'Rescue Needed',
       timestamp: '18:02',
       status: 'relayed_hq',
-      hopRoute: 'Your Phone → Peer Mobile (14m) → Sara Khan → HQ',
+      hopRoute: 'Your Phone → Peer Mobile (14m) → Fatima Noor → HQ',
       encryptedHash: '0x4f82a9...d4c1 (AES-GCM-256)',
-      recipient: 'Sara Khan'
+      recipient: 'Fatima Noor'
     },
     {
       id: 'msg-seed-2',
       sender: 'volunteer',
-      volunteerName: 'Sara Khan (Volunteer)',
+      volunteerName: 'Fatima Noor (Volunteer)',
       text: 'Copy that! Received your packet via 2-hop mobile relay. Rescue boat en route from Camp 3.',
       timestamp: '18:05',
       status: 'delivered'
     }
   ]);
+
+  // Load messages from persistent storage on mount & keep thread reactive across tabs
+  React.useEffect(() => {
+    const syncThread = async () => {
+      try {
+        const msgs = await fetchMessages();
+        if (Array.isArray(msgs) && msgs.length > 0) {
+          setMessages(msgs);
+          return;
+        }
+      } catch {}
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('reliefos_db_messages');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) setMessages(parsed);
+          } catch {}
+        }
+      }
+    };
+
+    syncThread();
+
+    const handleSync = () => syncThread();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('reliefos_db_sync', handleSync);
+      window.addEventListener('storage', handleSync);
+    }
+    const poller = setInterval(syncThread, 3000);
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('reliefos_db_sync', handleSync);
+        window.removeEventListener('storage', handleSync);
+      }
+      clearInterval(poller);
+    };
+  }, []);
 
   const showToast = (text) => {
     setNotification(text);
@@ -224,12 +263,18 @@ export default function AffectedUserMobileApp() {
       category: title,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: isMesh ? 'ble_sent' : 'relayed_hq',
-      hopRoute: isMesh ? 'Your Phone → Peer Mobile (14m) → Sara Khan → HQ' : 'Direct Cloud Upload',
+      hopRoute: isMesh ? `Your Phone → Peer Mobile (14m) → ${selectedVolunteer?.name || 'Fatima Noor'} → HQ` : 'Direct Cloud Upload',
       encryptedHash: `0x${Math.random().toString(16).substring(2, 10)}... (AES-GCM-256 / ECDH P-256)`,
-      recipient: selectedVolunteer?.name || 'Sara Khan'
+      recipient: selectedVolunteer?.name || 'Fatima Noor'
     };
 
-    setMessages(prev => [newMsg, ...prev]);
+    setMessages(prev => {
+      const updated = [newMsg, ...prev.filter(m => m.id !== newMsg.id)];
+      if (typeof window !== 'undefined') {
+        try { localStorage.setItem('reliefos_db_messages', JSON.stringify(updated)); } catch {}
+      }
+      return updated;
+    });
 
     // Query Gemini 2.5 Flash for immediate survival and first-aid instructions
     queryGeminiAI({
