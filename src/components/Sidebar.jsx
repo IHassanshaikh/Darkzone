@@ -111,7 +111,6 @@ export default function Sidebar() {
         <div className="flex items-center gap-2 px-1 pt-1 text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800">
           <img src="/logo.webp" alt="ReliefOS" className="w-4 h-4 rounded object-contain opacity-80" />
           <span className="font-semibold text-slate-700 dark:text-slate-300">ReliefOS</span>
-          <span className="text-[10px] font-mono text-slate-400">DARK ZONE</span>
         </div>
       </div>
     </aside>

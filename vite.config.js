@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'ReliefOS + DARK ZONE',
+        name: 'ReliefOS',
         short_name: 'ReliefOS',
-        description: 'Disaster response coordination: finding who needs help most and allocating scarce resources first.',
+        description: 'ReliefOS: Disaster response coordination system finding who needs help most and allocating scarce resources first.',
         theme_color: '#0f172a',
         background_color: '#020617',
         display: 'standalone',

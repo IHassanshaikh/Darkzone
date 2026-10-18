@@ -77,11 +77,8 @@ export default function Navbar() {
           />
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
                 ReliefOS
-              </span>
-              <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
-                DARK ZONE
               </span>
             </div>
             <p className="hidden md:block text-[9px] font-mono font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">

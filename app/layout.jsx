@@ -3,8 +3,9 @@ import { AppProvider } from '../src/context/AppContext';
 import AppShell from '../src/components/AppShell';
 
 export const metadata = {
-  title: 'ReliefOS + DARK ZONE | Disaster Response Command',
-  description: 'Disaster response coordination system finding who needs help most and allocating scarce resources first.',
+  title: 'ReliefOS | Disaster Response Command',
+  description: 'ReliefOS: Intelligent disaster response coordination platform finding who needs help most and allocating scarce resources first.',
+  keywords: ['ReliefOS', 'Disaster Response', 'Emergency Management', 'Resource Allocation', 'Citizen SOS', 'Relief Coordination'],
   manifest: '/manifest.json',
 };
 

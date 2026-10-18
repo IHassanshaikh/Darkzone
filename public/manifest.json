@@ -1,7 +1,7 @@
 {
-  "name": "ReliefOS + DARK ZONE",
+  "name": "ReliefOS",
   "short_name": "ReliefOS",
-  "description": "Disaster response coordination system finding who needs help most and allocating scarce resources first.",
+  "description": "ReliefOS: Disaster response coordination system finding who needs help most and allocating scarce resources first.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#020617",
