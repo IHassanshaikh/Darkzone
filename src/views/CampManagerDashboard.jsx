@@ -478,10 +478,10 @@ export default function CampManagerDashboard() {
             <Users className="w-4 h-4 text-slate-400" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">
+            <span className="text-2xl font-black text-slate-950" style={{ color: '#0f172a' }}>
               {occupancy}
             </span>
-            <span className="text-xs font-semibold text-slate-400">
+            <span className="text-xs font-semibold text-slate-500">
               / {capacity} persons
             </span>
             <span className={`ml-auto text-xs font-bold ${
@@ -498,7 +498,7 @@ export default function CampManagerDashboard() {
               style={{ width: `${Math.min(occupancyPct, 100)}%` }}
             />
           </div>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-500">
             {capacity - occupancy > 0 ? `${capacity - occupancy} beds remaining open` : 'Camp at maximum capacity'}
           </p>
         </div>
@@ -510,16 +510,16 @@ export default function CampManagerDashboard() {
             <HeartPulse className="w-4 h-4 text-rose-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">
+            <span className="text-2xl font-black text-slate-950" style={{ color: '#0f172a' }}>
               {Math.min(18, Math.round(occupancy * 0.08))}
             </span>
-            <span className="text-xs font-semibold text-slate-400">/ 20 beds filled</span>
+            <span className="text-xs font-semibold text-slate-500">/ 20 beds filled</span>
             <span className="ml-auto text-xs font-bold text-amber-500">90%</span>
           </div>
           <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
             <div className="h-full bg-rose-500 rounded-full" style={{ width: '90%' }} />
           </div>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-500">
             Stationed: Fatima Noor (Triage Scout)
           </p>
         </div>
@@ -531,15 +531,15 @@ export default function CampManagerDashboard() {
             <Truck className="w-4 h-4 text-blue-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">
+            <span className="text-2xl font-black text-slate-950" style={{ color: '#0f172a' }}>
               {incomingDeliveries.filter(d => d.status !== 'done').length}
             </span>
-            <span className="text-xs font-semibold text-slate-400">en route</span>
+            <span className="text-xs font-semibold text-slate-500">en route</span>
             <span className="ml-auto text-xs font-bold text-blue-600 dark:text-blue-400">
               {incomingDeliveries.length} total
             </span>
           </div>
-          <div className="text-[11px] text-slate-400 mt-2">
+          <div className="text-[11px] text-slate-500 mt-2">
             {incomingDeliveries.filter(d => d.status !== 'done').length > 0 
               ? 'Click "Confirm Arrival" below when driver arrives' 
               : 'No pending in-transit transfers'}
@@ -553,13 +553,13 @@ export default function CampManagerDashboard() {
             <UserCheck className="w-4 h-4 text-emerald-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">
+            <span className="text-2xl font-black text-slate-950" style={{ color: '#0f172a' }}>
               {campVolunteers.length || 2}
             </span>
-            <span className="text-xs font-semibold text-slate-400">responders on-site</span>
+            <span className="text-xs font-semibold text-slate-500">responders on-site</span>
             <span className="ml-auto text-xs font-bold text-emerald-600 dark:text-emerald-400">Active</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-2">
+          <p className="text-[11px] text-slate-500 mt-2">
             Mesh and VHF radio channels active
           </p>
         </div>
@@ -569,10 +569,10 @@ export default function CampManagerDashboard() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+            <h3 className="text-base font-black text-slate-950" style={{ color: '#0f172a' }}>
               Real-Time Stock Inventory &amp; Days-of-Supply
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-700 font-semibold mt-0.5" style={{ color: '#334155' }}>
               Automated burn-rate calculations based on {occupancy} current camp occupants.
             </p>
           </div>
@@ -584,7 +584,7 @@ export default function CampManagerDashboard() {
               label: itemObj.item,
               unit: 'units',
               icon: Package,
-              color: 'text-slate-500',
+              color: 'text-slate-700',
               bg: 'bg-slate-100',
               border: 'border-slate-300',
               burnPerPerson: 1
@@ -609,10 +609,10 @@ export default function CampManagerDashboard() {
                         <Icon className={`w-4 h-4 ${cfg.color}`} />
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                        <h4 className="text-sm font-black text-slate-950" style={{ color: '#0f172a' }}>
                           {cfg.label}
                         </h4>
-                        <span className="text-[10px] text-slate-400 uppercase font-mono">
+                        <span className="text-[10px] text-slate-600 font-bold uppercase font-mono" style={{ color: '#475569' }}>
                           {cfg.unit}
                         </span>
                       </div>
@@ -629,11 +629,11 @@ export default function CampManagerDashboard() {
 
                   <div className="space-y-1">
                     <div className="flex items-baseline justify-between">
-                      <span className="text-2xl font-black text-slate-900 dark:text-white">
+                      <span className="text-2xl font-black text-slate-950" style={{ color: '#0f172a' }}>
                         {itemObj.stock}
                       </span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        Target Reserve: <strong>{itemObj.need}</strong>
+                      <span className="text-xs text-slate-600 font-medium" style={{ color: '#475569' }}>
+                        Target Reserve: <strong className="text-slate-950" style={{ color: '#0f172a' }}>{itemObj.need}</strong>
                       </span>
                     </div>
 
@@ -647,9 +647,9 @@ export default function CampManagerDashboard() {
                     </div>
                   </div>
 
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-2">
+                  <div className="text-[11px] text-slate-600 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-2" style={{ color: '#475569' }}>
                     <span>Daily burn rate:</span>
-                    <strong className="text-slate-700 dark:text-slate-300">~{dailyBurn} {cfg.unit.split(' ')[0]}/day</strong>
+                    <strong className="text-slate-900 font-bold" style={{ color: '#0f172a' }}>~{dailyBurn} {cfg.unit.split(' ')[0]}/day</strong>
                   </div>
                 </div>
 
