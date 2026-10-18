@@ -122,13 +122,13 @@ class LocalStore {
     };
     this.messages.unshift(msg);
 
-    // Auto-create assigned duty for volunteer
-    if (msg.sender === 'user') {
+    // Auto-create assigned duty & broadcast notification for citizen/user emergency
+    if (msg.sender === 'user' || msg.sender === 'citizen') {
       const newDuty = {
         id: `duty-sos-${Date.now()}`,
-        volunteerId: msg.recipientId,
-        volunteerName: msg.recipientName,
-        title: `EMERGENCY DISPATCH: ${msg.category}`,
+        volunteerId: msg.recipientId || 'vol-1',
+        volunteerName: msg.recipientName || 'Sara Khan',
+        title: `EMERGENCY DISPATCH: ${msg.category || 'CITIZEN SOS'}`,
         location: 'Area C (Delta Sector)',
         areaId: 'area-c',
         status: 'assigned',
@@ -141,13 +141,15 @@ class LocalStore {
 
       this.broadcastNotification({
         type: 'sos_message',
-        title: `EMERGENCY ALERT // ${msg.category.toUpperCase()}`,
-        message: `From ${msg.senderName}: "${msg.text}"`,
-        targetRole: 'volunteer',
-        targetVolunteerId: msg.recipientId,
+        title: `EMERGENCY SOS // ${(msg.category || 'CITIZEN SOS').toUpperCase()}`,
+        message: `From ${msg.senderName}: "${msg.text}" (Routed to ${msg.recipientName || 'Sara Khan'})`,
+        targetRole: 'all',
+        targetRoles: ['all', 'volunteer', 'admin', 'coordinator'],
+        targetVolunteerId: msg.recipientId || null,
         link: '/volunteer'
       });
       this.save('duties');
+      this.save('notifications');
     }
     this.save('messages');
     return msg;

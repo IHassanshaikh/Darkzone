@@ -43,8 +43,19 @@ import {
   HeartPulse
 } from 'lucide-react';
 
+const VOLUNTEER_PROFILES = [
+  { id: 'vol-1', name: 'Sara Khan', initials: 'SK', role: 'SEARCH & RESCUE SCOUT', hub: 'DELTA SECTOR 9' },
+  { id: 'vol-3', name: 'Fatima Noor', initials: 'FN', role: 'PARAMEDIC // SCOUT', hub: 'COASTAL CAMP B' },
+  { id: 'vol-4', name: 'Alex Rivera', initials: 'AR', role: 'RECON SCOUT', hub: 'NORTH SECTOR' }
+];
+
 export default function VolunteerDashboard() {
   const { isOnline, pendingSyncCount, syncNow, isSyncing, showToast } = useApp();
+  const [selectedVolId, setSelectedVolId] = useState('vol-1'); // Default to Sara Khan
+  const currentVolunteer = VOLUNTEER_PROFILES.find(v => v.id === selectedVolId) || VOLUNTEER_PROFILES[0];
+  const currentVolunteerId = currentVolunteer.id;
+  const currentVolunteerName = currentVolunteer.name;
+
   const [duties, setDuties] = useState([]);
   const [citizenMessages, setCitizenMessages] = useState([]);
   const [camps, setCamps] = useState([]);
@@ -64,10 +75,6 @@ export default function VolunteerDashboard() {
   const [reqPriority, setReqPriority] = useState('critical');
   const [reqNotes, setReqNotes] = useState('Urgent drinking water replenishment required for displaced families in Sector Delta 9.');
   const [isSubmittingReq, setIsSubmittingReq] = useState(false);
-
-  // Active Volunteer ID & Name
-  const currentVolunteerId = 'vol-3';
-  const currentVolunteerName = 'Fatima Noor';
 
   const handleRunSafetyCheck = async () => {
     setIsAiSafetyLoading(true);
@@ -93,7 +100,7 @@ export default function VolunteerDashboard() {
     try {
       const [allDuties, allMsgs, allCamps] = await Promise.all([
         fetchDuties(),
-        fetchMessages({ volunteerId: currentVolunteerId }),
+        fetchMessages(),
         fetchCamps()
       ]);
       setDuties(allDuties);
@@ -112,7 +119,7 @@ export default function VolunteerDashboard() {
   useEffect(() => {
     loadData();
     const handleSync = () => {
-      fetchMessages({ volunteerId: currentVolunteerId }).then(setCitizenMessages).catch(() => {});
+      fetchMessages().then(setCitizenMessages).catch(() => {});
       fetchDuties().then(setDuties).catch(() => {});
     };
     if (typeof window !== 'undefined') {
@@ -193,19 +200,29 @@ export default function VolunteerDashboard() {
       <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center font-mono font-bold text-xs shadow-xs">
-            FN
+            {currentVolunteer.initials}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+              <h1 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
                 {currentVolunteerName}
               </h1>
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
-                PARAMEDIC // SCOUT
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700">
+                {currentVolunteer.role}
               </span>
+              <select
+                value={selectedVolId}
+                onChange={(e) => setSelectedVolId(e.target.value)}
+                className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer ml-1"
+                title="Switch active field volunteer profile"
+              >
+                {VOLUNTEER_PROFILES.map(p => (
+                  <option key={p.id} value={p.id}>{p.name} ({p.id})</option>
+                ))}
+              </select>
             </div>
-            <p className="text-[11px] font-mono text-slate-400 dark:text-slate-500 mt-0.5">
-              HUB: COASTAL CAMP B • ID: {currentVolunteerId}
+            <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+              HUB: {currentVolunteer.hub} • ACTIVE RESPONDER ID: {currentVolunteerId}
             </p>
           </div>
         </div>

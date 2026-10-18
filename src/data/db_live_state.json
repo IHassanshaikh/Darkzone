@@ -484,7 +484,7 @@
       ],
       "targetVolunteerId": "vol-3",
       "link": "/volunteer",
-      "acknowledged": false,
+      "acknowledged": true,
       "timestamp": "2026-10-18T16:29:53.876Z",
       "meta": {
         "messageId": "msg-1792340993875",
@@ -499,7 +499,7 @@
       "targetRole": "all",
       "targetVolunteerId": "vol-1",
       "link": "/volunteer",
-      "acknowledged": false,
+      "acknowledged": true,
       "timestamp": "2026-10-18T15:59:53.728Z"
     }
   ],

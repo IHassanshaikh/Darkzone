@@ -161,14 +161,14 @@ class ServerDB {
     };
     this.messages.unshift(msg);
 
-    // Auto-create assigned duty for recipient volunteer if this is an emergency
-    if (msg.sender === 'user') {
+    // Auto-create assigned duty & broadcast emergency popup across screens
+    if (msg.sender === 'user' || msg.sender === 'citizen') {
       const dutyId = `duty-sos-${Date.now()}`;
       const newDuty = {
         id: dutyId,
-        volunteerId: msg.recipientId,
-        volunteerName: msg.recipientName,
-        title: `EMERGENCY DISPATCH: ${msg.category}`,
+        volunteerId: msg.recipientId || 'vol-1',
+        volunteerName: msg.recipientName || 'Sara Khan',
+        title: `EMERGENCY DISPATCH: ${msg.category || 'CITIZEN SOS'}`,
         location: 'Area C (Delta Sector)',
         areaId: 'area-c',
         status: 'assigned', // 'assigned' | 'in_progress' | 'done'
@@ -179,20 +179,21 @@ class ServerDB {
       };
       this.duties.unshift(newDuty);
 
-      // Create high-priority notification popup
+      // Create high-priority notification popup (visible to all volunteers and command)
       this.broadcastNotification({
         type: 'sos_message',
-        title: `EMERGENCY ALERT // ${msg.category.toUpperCase()}`,
-        message: `From ${msg.senderName}: "${msg.text}"`,
-        targetRole: 'volunteer',
-        targetVolunteerId: msg.recipientId,
+        title: `EMERGENCY SOS // ${(msg.category || 'CITIZEN SOS').toUpperCase()}`,
+        message: `From ${msg.senderName}: "${msg.text}" (Routed to ${msg.recipientName || 'Sara Khan'})`,
+        targetRole: 'all',
+        targetRoles: ['all', 'volunteer', 'admin', 'coordinator'],
+        targetVolunteerId: msg.recipientId || null,
         link: '/volunteer',
         meta: { messageId: msg.id, dutyId: newDuty.id }
       });
 
       this.logActivity(
         'citizen_sos',
-        `Citizen SOS dispatched to ${msg.recipientName}: "${msg.text.substring(0, 50)}..."`,
+        `Citizen SOS dispatched to ${msg.recipientName || 'Field Volunteer'}: "${msg.text.substring(0, 50)}..."`,
         'Urgent'
       );
     }

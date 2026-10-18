@@ -344,12 +344,10 @@ export function AppProvider({ children }) {
   // Poll for live emergency alerts every 2.5 seconds across all screens
   useEffect(() => {
     let isSubscribed = true;
-    const pollInterval = setInterval(async () => {
+
+    const checkAlerts = async () => {
       try {
-        const notifs = await fetchActiveNotifications({ 
-          role, 
-          volunteerId: user?.volunteerId || (role === 'volunteer' ? 'vol-3' : null) 
-        });
+        const notifs = await fetchActiveNotifications({ role });
         if (!isSubscribed) return;
         if (notifs && notifs.length > 0) {
           const latest = notifs[0];
@@ -364,13 +362,24 @@ export function AppProvider({ children }) {
             return prev;
           });
         }
-      } catch (err) {
-        // silent fallback
-      }
-    }, 2500);
+      } catch (err) {}
+    };
+
+    checkAlerts();
+
+    const handleSync = () => checkAlerts();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('reliefos_db_sync', handleSync);
+      window.addEventListener('storage', handleSync);
+    }
+    const pollInterval = setInterval(checkAlerts, 1500);
 
     return () => {
       isSubscribed = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('reliefos_db_sync', handleSync);
+        window.removeEventListener('storage', handleSync);
+      }
       clearInterval(pollInterval);
     };
   }, [role, user]);
