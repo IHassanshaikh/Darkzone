@@ -389,18 +389,18 @@ export default function AffectedUserMobileApp() {
       </header>
 
       {/* Main Mobile Application Chassis */}
-      <div className={`w-full ${isFramedView ? 'max-w-[400px] h-[870px] rounded-[48px] border-[10px] border-[#1E2E1A] shadow-2xl shadow-black/60 ring-1 ring-[#3D6130]' : 'h-screen max-w-full rounded-none border-none'} bg-[#F4F5EB] flex flex-col overflow-hidden relative transition-all`}>
+      <div className={`w-full citizen-mobile-app ${isFramedView ? 'max-w-[400px] h-[870px] rounded-[48px] border-[10px] border-[#1E2E1A] shadow-2xl shadow-black/60 ring-1 ring-[#3D6130]' : 'h-screen max-w-full rounded-none border-none'} bg-[#F4F5EB] flex flex-col overflow-hidden relative transition-all`}>
         
         {/* Mobile Phone Status Bar with Forest Gradient */}
-        <div className="w-full flex items-center justify-between px-7 pt-3 pb-1 bg-gradient-to-r from-[#1C3315] via-[#2D4A22] to-[#3E6630] text-white text-[11px] font-sans font-bold select-none flex-shrink-0">
-          <span>9:41</span>
+        <div className="w-full flex items-center justify-between px-7 pt-3 pb-1 bg-gradient-to-r from-[#1C3315] via-[#2D4A22] to-[#3E6630] text-white text-[11px] font-sans font-bold select-none flex-shrink-0" style={{ color: '#ffffff' }}>
+          <span style={{ color: '#ffffff' }}>9:41</span>
           <div className="w-20 h-4 bg-[#182C13] rounded-full flex items-center justify-center border border-white/10">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5" style={{ color: '#ffffff' }}>
             <Bluetooth className={`w-3 h-3 ${!hasWifi ? 'text-amber-300' : 'text-slate-400'}`} />
             <Radio className="w-3 h-3 text-white" />
-            <span>98%</span>
+            <span style={{ color: '#ffffff' }}>98%</span>
           </div>
         </div>
 
@@ -411,8 +411,8 @@ export default function AffectedUserMobileApp() {
               <Trees className="w-4 h-4 text-[#2D4A22]" strokeWidth={2.5} />
             </div>
             <div>
-              <div className="text-sm font-black text-white leading-tight">ReliefOS</div>
-              <div className="text-[10px] font-medium text-[#D1DEC9] leading-tight">Camp Resident</div>
+              <div className="text-sm font-black text-white leading-tight" style={{ color: '#ffffff' }}>ReliefOS</div>
+              <div className="text-[10px] font-semibold text-[#D1DEC9] leading-tight" style={{ color: '#D1DEC9' }}>Camp Resident</div>
             </div>
           </div>
 
@@ -420,15 +420,15 @@ export default function AffectedUserMobileApp() {
             {/* Bell with Notification Badge */}
             <div className="relative cursor-pointer">
               <Bell className="w-4 h-4 text-white" />
-              <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full text-[8.5px] font-bold text-white flex items-center justify-center shadow-xs">
+              <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full text-[8.5px] font-bold text-white flex items-center justify-center shadow-xs" style={{ color: '#ffffff' }}>
                 1
               </span>
             </div>
 
             {/* Language / Resident Pill */}
-            <div className="px-2 py-0.5 rounded-full bg-white/20 border border-white/30 flex items-center gap-1 text-white text-[10.5px] font-bold backdrop-blur-xs">
-              <span>EN</span>
-              <ChevronRight className="w-3 h-3" />
+            <div className="px-2 py-0.5 rounded-full bg-white/20 border border-white/30 flex items-center gap-1 text-white text-[10.5px] font-bold backdrop-blur-xs" style={{ color: '#ffffff' }}>
+              <span style={{ color: '#ffffff' }}>EN</span>
+              <ChevronRight className="w-3 h-3 text-white" />
             </div>
           </div>
         </div>
@@ -441,12 +441,12 @@ export default function AffectedUserMobileApp() {
             {!hasWifi ? (
               <>
                 <Smartphone className="w-3.5 h-3.5 text-[#92400E]" />
-                <span className="text-[#92400E]">No Wi-Fi — Mobile-to-Mobile Relay Active</span>
+                <span className="text-[#92400E] font-bold">No Wi-Fi — Mobile-to-Mobile Relay Active</span>
               </>
             ) : (
               <>
                 <Wifi className="w-3.5 h-3.5 text-[#15803D]" />
-                <span className="text-[#15803D]">Wi-Fi Connected — Direct Cloud Upload</span>
+                <span className="text-[#15803D] font-bold">Wi-Fi Connected — Direct Cloud Upload</span>
               </>
             )}
           </div>
@@ -455,17 +455,21 @@ export default function AffectedUserMobileApp() {
             className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-white text-[10px] font-bold transition-all shadow-xs ${
               !hasWifi ? 'bg-gradient-to-r from-[#203918] via-[#2D4A22] to-[#385F2C] hover:brightness-110' : 'bg-gradient-to-r from-[#14532D] to-[#15803D] hover:brightness-110'
             }`}
+            style={{ color: '#ffffff' }}
           >
             {!hasWifi ? <Wifi className="w-2.5 h-2.5" /> : <WifiOff className="w-2.5 h-2.5" />}
-            <span>{!hasWifi ? 'Enable Wi-Fi' : 'Simulate No Wi-Fi'}</span>
+            <span style={{ color: '#ffffff' }}>{!hasWifi ? 'Enable Wi-Fi' : 'Simulate No Wi-Fi'}</span>
           </button>
         </div>
 
-        {/* Toast Alert Pop-up */}
+        {/* Toast Alert Pop-up with Crystal Clear High Contrast */}
         {notification && (
-          <div className="absolute top-28 left-4 right-4 z-50 p-2.5 rounded-xl bg-gradient-to-r from-[#1C3315] via-[#2D4A22] to-[#385F2C] text-white text-xs font-medium shadow-xl border border-[#436D34]/50 flex items-center gap-2 animate-bounce">
+          <div 
+            className="mobile-toast absolute top-28 left-4 right-4 z-50 p-3 rounded-xl bg-[#14260F] text-white text-xs font-bold shadow-2xl border-2 border-emerald-400 flex items-center gap-2.5 animate-bounce"
+            style={{ backgroundColor: '#14260F', color: '#ffffff', borderColor: '#34d399' }}
+          >
             <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span className="flex-1">{notification}</span>
+            <span className="flex-1 text-white font-bold tracking-wide" style={{ color: '#ffffff' }}>{notification}</span>
           </div>
         )}
 
@@ -751,12 +755,13 @@ export default function AffectedUserMobileApp() {
                 onClick={() => setActiveTab('requests')}
                 disabled={isSending}
                 className="w-full py-3 px-4 rounded-2xl bg-[#DC2626] text-white flex flex-col items-center justify-center shadow-md hover:bg-red-700 transition-colors active:scale-98"
+                style={{ backgroundColor: '#DC2626', color: '#ffffff' }}
               >
-                <div className="flex items-center gap-2 text-sm font-black tracking-wide">
-                  <AlertTriangle className="w-4 h-4" strokeWidth={2.5} />
-                  <span>SOS / Request</span>
+                <div className="flex items-center gap-2 text-sm font-black tracking-wide" style={{ color: '#ffffff' }}>
+                  <AlertTriangle className="w-4 h-4 text-white" strokeWidth={2.5} />
+                  <span style={{ color: '#ffffff' }}>SOS / Request</span>
                 </div>
-                <div className="text-[10px] text-red-100 font-medium">
+                <div className="text-[10px] text-red-100 font-medium" style={{ color: '#FEE2E2' }}>
                   Emergency Help · Tap to notify nearest team
                 </div>
               </button>

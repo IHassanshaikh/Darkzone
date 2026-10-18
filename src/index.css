@@ -180,70 +180,40 @@ html:not(.dark) .text-slate-500 {
   color: #64748b !important;
 }
 
-/* Headings and Typography in Light Mode */
-html.light h1,
-html.light h2,
-html.light h3,
-html.light h4,
-html.light h5,
-html.light h6,
-html:not(.dark) h1,
-html:not(.dark) h2,
-html:not(.dark) h3,
-html:not(.dark) h4,
-html:not(.dark) h5,
-html:not(.dark) h6 {
-  color: #0f172a !important;
-  font-weight: 700 !important;
+/* Headings in Light Mode (only when not explicitly given a light/white text color) */
+html.light h1:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html.light h2:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html.light h3:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html.light h4:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html.light h5:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html.light h6:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html:not(.dark) h1:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html:not(.dark) h2:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html:not(.dark) h3:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html:not(.dark) h4:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html:not(.dark) h5:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]),
+html:not(.dark) h6:not(.text-white):not([class*="text-slate-100"]):not([class*="text-white"]) {
+  color: #0f172a;
+  font-weight: 700;
 }
 
-/* Universal Light Mode Contrast for text-white on content elements */
-html.light .text-white:not(button):not(button *):not([role="button"]):not([role="button"] *):not(.brand-icon):not(.brand-icon *),
-html:not(.dark) .text-white:not(button):not(button *):not([role="button"]):not([role="button"] *):not(.brand-icon):not(.brand-icon *) {
-  color: #0f172a !important;
+/* Ensure .text-white is ALWAYS pure crisp white across ALL themes, buttons, cards, toasts, and headers */
+.text-white,
+.text-white *,
+[class*="text-white"],
+button.text-white,
+[role="button"].text-white,
+.brand-icon,
+.brand-icon * {
+  color: #ffffff !important;
 }
 
-/* Explicit Headings and Content Tags */
-html.light h1.text-white,
-html.light h2.text-white,
-html.light h3.text-white,
-html.light h4.text-white,
-html.light h5.text-white,
-html.light h6.text-white,
-html.light p.text-white,
-html.light span.text-white:not(button *):not(.brand-icon *),
-html.light div.text-white:not(button *):not(.brand-icon *),
-html.light strong.text-white:not(button *):not(.brand-icon *),
-html.light td.text-white,
-html.light th.text-white,
-html:not(.dark) h1.text-white,
-html:not(.dark) h2.text-white,
-html:not(.dark) h3.text-white,
-html:not(.dark) h4.text-white,
-html:not(.dark) h5.text-white,
-html:not(.dark) h6.text-white,
-html:not(.dark) p.text-white,
-html:not(.dark) span.text-white:not(button *):not(.brand-icon *),
-html:not(.dark) div.text-white:not(button *):not(.brand-icon *),
-html:not(.dark) strong.text-white:not(button *):not(.brand-icon *),
-html:not(.dark) td.text-white,
-html:not(.dark) th.text-white {
-  color: #0f172a !important;
-}
-
-/* Ensure Buttons and Brand Icons retain crisp white text */
-html.light button.text-white,
-html.light button .text-white,
-html.light [role="button"].text-white,
-html.light [role="button"] .text-white,
-html.light .brand-icon,
-html.light .brand-icon *,
-html:not(.dark) button.text-white,
-html:not(.dark) button .text-white,
-html:not(.dark) [role="button"].text-white,
-html:not(.dark) [role="button"] .text-white,
-html:not(.dark) .brand-icon,
-html:not(.dark) .brand-icon * {
+/* Mobile App & Tactical Surface Contrast Protection */
+.citizen-mobile-app .text-white,
+.citizen-mobile-app [class*="text-white"],
+.mobile-app .text-white,
+.mobile-toast,
+.mobile-toast * {
   color: #ffffff !important;
 }
 
