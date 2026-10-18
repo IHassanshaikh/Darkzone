@@ -8,6 +8,7 @@ import Sidebar from './Sidebar';
 import AuthGuard from './AuthGuard';
 import SwitchRoleModal from './SwitchRoleModal';
 import LoginView from '../views/LoginView';
+import GlobalEmergencyPopup from './GlobalEmergencyPopup';
 
 export default function AppShell({ children }) {
   const { user, isAuthChecked } = useApp();
@@ -16,7 +17,8 @@ export default function AppShell({ children }) {
   // 1. If on /mobile route, render the citizen mobile application directly immediately
   if (pathname === '/mobile') {
     return (
-      <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative">
+        <GlobalEmergencyPopup />
         {children}
       </main>
     );
@@ -40,6 +42,7 @@ export default function AppShell({ children }) {
   if (!user || pathname === '/login') {
     return (
       <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <GlobalEmergencyPopup />
         <LoginView targetRestrictedRoute={pathname !== '/' && pathname !== '/login' ? pathname : null} />
       </main>
     );
@@ -48,6 +51,7 @@ export default function AppShell({ children }) {
   // 3. Authenticated: Render Full Command Center Shell with Navbar, Sidebar, Page Guard & Role Switcher
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col">
+      <GlobalEmergencyPopup />
       <Navbar />
       <div className="flex-1 flex flex-row">
         <Sidebar />

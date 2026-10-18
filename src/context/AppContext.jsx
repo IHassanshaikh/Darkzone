@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { subscribeQueue, flushOfflineQueue, getPendingQueue } from '../lib/offlineQueue';
-import { isUsingMockData, syncQueueAction, checkBackendHealth } from '../lib/api';
+import { isUsingMockData, syncQueueAction, checkBackendHealth, fetchActiveNotifications, acknowledgeNotificationAction } from '../lib/api';
 
 const AppContext = createContext(null);
 
@@ -326,6 +326,55 @@ export function AppProvider({ children }) {
     }
   }, [isSyncing]);
 
+  // Real-time Emergency Alert Popup State
+  const [activeAlert, setActiveAlert] = useState(null);
+  const [seenAlertIds, setSeenAlertIds] = useState(new Set());
+
+  const dismissAlert = useCallback(async (alertId) => {
+    setActiveAlert(null);
+    if (alertId) {
+      try {
+        await acknowledgeNotificationAction(alertId);
+      } catch (e) {
+        console.warn('Ack failed:', e);
+      }
+    }
+  }, []);
+
+  // Poll for live emergency alerts every 2.5 seconds across all screens
+  useEffect(() => {
+    let isSubscribed = true;
+    const pollInterval = setInterval(async () => {
+      try {
+        const notifs = await fetchActiveNotifications({ 
+          role, 
+          volunteerId: user?.volunteerId || (role === 'volunteer' ? 'vol-3' : null) 
+        });
+        if (!isSubscribed) return;
+        if (notifs && notifs.length > 0) {
+          const latest = notifs[0];
+          setSeenAlertIds(prev => {
+            if (!prev.has(latest.id)) {
+              setActiveAlert(latest);
+              showToast(`${latest.title}: ${latest.message}`, latest.type === 'sos_message' ? 'error' : 'info');
+              const next = new Set(prev);
+              next.add(latest.id);
+              return next;
+            }
+            return prev;
+          });
+        }
+      } catch (err) {
+        // silent fallback
+      }
+    }, 2500);
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(pollInterval);
+    };
+  }, [role, user]);
+
   return (
     <AppContext.Provider
       value={{
@@ -354,7 +403,10 @@ export function AppProvider({ children }) {
         showToast,
         theme,
         setTheme,
-        toggleTheme
+        toggleTheme,
+        activeAlert,
+        dismissAlert,
+        setActiveAlert
       }}
     >
       {children}

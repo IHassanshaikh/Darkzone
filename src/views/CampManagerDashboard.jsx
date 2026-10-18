@@ -10,6 +10,8 @@ import {
   updateCampOccupancyAction, 
   confirmDeliveryArrivalAction,
   submitCampRequisitionAction,
+  fetchRequisitions,
+  updateRequisitionAction,
   queryGeminiAI 
 } from '../lib/api';
 import { 
@@ -132,17 +134,20 @@ export default function CampManagerDashboard() {
     }
   };
 
+  const [fieldRequisitions, setFieldRequisitions] = useState([]);
+
   const loadData = async () => {
-    setLoading(true);
     try {
-      const [campsData, dutiesData, volsData] = await Promise.all([
+      const [campsData, dutiesData, volsData, reqsData] = await Promise.all([
         fetchCamps(),
         fetchDuties(),
-        fetchVolunteers()
+        fetchVolunteers(),
+        fetchRequisitions()
       ]);
       setCamps(campsData);
       setDuties(dutiesData);
       setVolunteers(volsData);
+      setFieldRequisitions(reqsData || []);
     } catch (err) {
       console.error('Failed to load camp manager data:', err);
     } finally {
@@ -152,6 +157,23 @@ export default function CampManagerDashboard() {
 
   useEffect(() => {
     loadData();
+    // 3s interval polling for volunteer requisitions and convoy duties
+    const interval = setInterval(async () => {
+      try {
+        const [campsData, reqsData, dutiesData] = await Promise.all([
+          fetchCamps(),
+          fetchRequisitions(),
+          fetchDuties()
+        ]);
+        setCamps(campsData);
+        setFieldRequisitions(reqsData || []);
+        setDuties(dutiesData);
+      } catch (err) {
+        // silent fallback
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const currentCamp = useMemo(() => {
@@ -254,6 +276,19 @@ export default function CampManagerDashboard() {
       await loadData();
     } catch (err) {
       showToast(`Confirmation failed: ${err.message}`, 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleApproveFieldRequisition = async (req) => {
+    setActionLoading(true);
+    try {
+      await updateRequisitionAction(req.id, { status: 'approved' });
+      showToast(`Requisition #${req.id.substr(-6)} APPROVED! Camp inventory deducted and delivery convoy queued.`, 'success');
+      await loadData();
+    } catch (err) {
+      showToast(`Approval failed: ${err.message}`, 'error');
     } finally {
       setActionLoading(false);
     }
@@ -645,6 +680,92 @@ export default function CampManagerDashboard() {
             );
           })}
         </div>
+      </div>
+
+      {/* INCOMING FIELD REQUISITIONS FROM VOLUNTEERS */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-amber-500/30 dark:border-amber-500/40 p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-amber-500" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase font-mono">
+                INCOMING VOLUNTEER FIELD REQUISITIONS ({fieldRequisitions.length})
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Review and approve supply requests submitted by field responders. Approval automatically deducts camp stock and dispatches a delivery convoy.
+            </p>
+          </div>
+          <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+            LIVE POLLING (3s)
+          </span>
+        </div>
+
+        {fieldRequisitions.length === 0 ? (
+          <div className="py-8 text-center text-slate-400 text-xs font-mono">
+            No incoming volunteer requisitions at this time. When responders request camp resources from the field, they appear here instantly.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {fieldRequisitions.map((req) => {
+              const isApproved = req.status === 'approved';
+              return (
+                <div key={req.id} className="py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
+                        #{req.id.substr(-6)}
+                      </span>
+                      <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                        isApproved
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                          : req.priority === 'critical'
+                          ? 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 animate-pulse'
+                          : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
+                      }`}>
+                        {isApproved ? 'Approved // Convoy Dispatched' : `${req.priority?.toUpperCase()} PRIORITY`}
+                      </span>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        Responder: <strong>{req.volunteerName}</strong>
+                      </span>
+                      <span className="text-xs text-slate-400">
+                        • Target: <strong>{req.campName}</strong>
+                      </span>
+                    </div>
+
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                      Requested: {req.items?.map(i => `${i.quantity} ${i.unit || ''} ${i.item}`).join(', ')}
+                    </h4>
+
+                    {req.notes && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+                        "{req.notes}"
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 self-start md:self-center flex-shrink-0">
+                    {!isApproved ? (
+                      <button
+                        onClick={() => handleApproveFieldRequisition(req)}
+                        disabled={actionLoading}
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-600 to-amber-700 hover:brightness-110 text-white transition flex items-center gap-1.5 shadow-md shadow-amber-600/20"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Approve &amp; Dispatch Convoy</span>
+                      </button>
+                    ) : (
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <Truck className="w-4 h-4" /> Convoy Active
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Grid: Arriving Deliveries & Emergency Requisitions */}

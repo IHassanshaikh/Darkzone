@@ -24,6 +24,40 @@ class LocalStore {
     this.volunteers = JSON.parse(JSON.stringify(initialVolunteers));
     this.duties = JSON.parse(JSON.stringify(initialDuties));
     this.reports = JSON.parse(JSON.stringify(initialReports));
+    this.messages = [
+      {
+        id: 'msg-seed-1',
+        sender: 'user',
+        senderName: 'Citizen (Khanpur Valley)',
+        recipientId: 'vol-3',
+        recipientName: 'Fatima Noor (Volunteer)',
+        text: 'Water entered ground floor, emergency boat requested for 4 citizens.',
+        category: 'Rescue Needed',
+        timestamp: new Date(Date.now() - 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'relayed_hq',
+        hopRoute: 'Your Phone -> Peer Mobile (14m) -> Fatima Noor -> HQ',
+        createdAt: new Date(Date.now() - 3600000).toISOString()
+      }
+    ];
+    this.requisitions = [
+      {
+        id: 'req-seed-1',
+        volunteerId: 'vol-3',
+        volunteerName: 'Fatima Noor',
+        campId: 'camp-b',
+        campName: 'Camp B (Coastal School)',
+        items: [
+          { item: 'water', quantity: 60, unit: 'Liters' },
+          { item: 'medicine', quantity: 15, unit: 'Trauma Packs' }
+        ],
+        priority: 'critical',
+        notes: 'Area C flood surge: 12 elderly residents require sterile dressing and hydration.',
+        status: 'pending',
+        createdAt: new Date(Date.now() - 1800000).toISOString(),
+        updatedAt: new Date(Date.now() - 1800000).toISOString()
+      }
+    ];
+    this.notifications = [];
     this.activityLog = [
       { id: 1, kind: 'system', message: 'ReliefOS core monitoring engines initialized.', timestamp: new Date(Date.now() - 3600000).toISOString(), label: null },
       { id: 2, kind: 'dark_zone', message: 'Potential Dark Zone flagged in Delta Sector 9 (Area C) based on 98% reporting silence.', timestamp: new Date(Date.now() - 1800000).toISOString(), label: 'Suggested' },
@@ -40,7 +74,102 @@ class LocalStore {
       timestamp: new Date().toISOString(),
       label
     });
-    if (this.activityLog.length > 20) this.activityLog.pop();
+    if (this.activityLog.length > 50) this.activityLog.pop();
+  }
+
+  addMessage(messageData) {
+    const msg = {
+      id: messageData.id || `msg-${Date.now()}`,
+      sender: messageData.sender || 'user',
+      senderName: messageData.senderName || 'Resident',
+      recipientId: messageData.recipientId || 'vol-3',
+      recipientName: messageData.recipientName || 'Fatima Noor (Volunteer)',
+      text: messageData.text,
+      category: messageData.category || 'Emergency',
+      hopRoute: messageData.hopRoute || 'P2P Bluetooth Mesh',
+      status: 'delivered',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      createdAt: new Date().toISOString()
+    };
+    this.messages.unshift(msg);
+
+    // Auto-create assigned duty for volunteer
+    if (msg.sender === 'user') {
+      const newDuty = {
+        id: `duty-sos-${Date.now()}`,
+        volunteerId: msg.recipientId,
+        volunteerName: msg.recipientName,
+        title: `EMERGENCY DISPATCH: ${msg.category}`,
+        location: 'Area C (Delta Sector)',
+        areaId: 'area-c',
+        status: 'assigned',
+        priority: 'critical',
+        notes: `Distress text: "${msg.text}". Route: ${msg.hopRoute}`,
+        type: 'rescue',
+        createdAt: new Date().toISOString()
+      };
+      this.duties.unshift(newDuty);
+
+      this.broadcastNotification({
+        type: 'sos_message',
+        title: `EMERGENCY ALERT // ${msg.category.toUpperCase()}`,
+        message: `From ${msg.senderName}: "${msg.text}"`,
+        targetRole: 'volunteer',
+        targetVolunteerId: msg.recipientId,
+        link: '/volunteer'
+      });
+    }
+    return msg;
+  }
+
+  addRequisition(reqData) {
+    const req = {
+      id: reqData.id || `req-${Date.now()}`,
+      volunteerId: reqData.volunteerId || 'vol-3',
+      volunteerName: reqData.volunteerName || 'Fatima Noor',
+      campId: reqData.campId || 'camp-b',
+      campName: reqData.campName || 'Camp B (Coastal School)',
+      items: reqData.items || [{ item: 'water', quantity: 50, unit: 'Liters' }],
+      priority: reqData.priority || 'high',
+      notes: reqData.notes || 'Emergency field supplies requisition.',
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.requisitions.unshift(req);
+
+    this.broadcastNotification({
+      type: 'resource_requisition',
+      title: 'NEW RESOURCE REQUISITION',
+      message: `${req.volunteerName} requested supplies for ${req.campName}`,
+      targetRole: 'camp_manager',
+      link: '/camp-manager'
+    });
+
+    return req;
+  }
+
+  updateRequisition(id, updates) {
+    const req = this.requisitions.find(r => r.id === id);
+    if (!req) return null;
+    Object.assign(req, updates, { updatedAt: new Date().toISOString() });
+    return req;
+  }
+
+  broadcastNotification(notif) {
+    const newNotif = {
+      id: notif.id || `notif-${Date.now()}`,
+      type: notif.type || 'alert',
+      title: notif.title || 'System Alert',
+      message: notif.message,
+      targetRole: notif.targetRole || 'all',
+      targetVolunteerId: notif.targetVolunteerId || null,
+      link: notif.link || '/',
+      acknowledged: false,
+      timestamp: new Date().toISOString()
+    };
+    this.notifications.unshift(newNotif);
+    return newNotif;
   }
 }
 
@@ -847,3 +976,146 @@ export async function queryGeminiAI({ prompt, task = 'chat', context = {} }) {
     };
   }
 }
+
+/**
+ * Send Citizen SOS Message to Volunteer
+ */
+export async function sendMessageAction(messageData) {
+  try {
+    const res = await fetch(`${API_BASE}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(messageData)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.data;
+    }
+  } catch (err) {
+    console.warn('Network message send failed, saving to local store:', err);
+  }
+  return localStore.addMessage(messageData);
+}
+
+/**
+ * Fetch Messages for a Volunteer or Citizen
+ */
+export async function fetchMessages({ volunteerId = null, recipient = null } = {}) {
+  try {
+    const query = new URLSearchParams();
+    if (volunteerId) query.set('volunteerId', volunteerId);
+    if (recipient) query.set('recipient', recipient);
+    const res = await fetch(`${API_BASE}/messages?${query.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      return json.data;
+    }
+  } catch (err) {
+    console.warn('Network message fetch failed, using local store:', err);
+  }
+  let msgs = [...localStore.messages];
+  if (volunteerId) msgs = msgs.filter(m => m.recipientId === volunteerId || m.sender === volunteerId);
+  return msgs;
+}
+
+/**
+ * Submit Volunteer Camp Resource Requisition
+ */
+export async function submitRequisitionAction(reqData) {
+  try {
+    const res = await fetch(`${API_BASE}/requisitions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reqData)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.data;
+    }
+  } catch (err) {
+    console.warn('Network requisition failed, saving to local store:', err);
+  }
+  return localStore.addRequisition(reqData);
+}
+
+/**
+ * Fetch Camp Resource Requisitions
+ */
+export async function fetchRequisitions({ campId = null, volunteerId = null, status = null } = {}) {
+  try {
+    const query = new URLSearchParams();
+    if (campId) query.set('campId', campId);
+    if (volunteerId) query.set('volunteerId', volunteerId);
+    if (status) query.set('status', status);
+    const res = await fetch(`${API_BASE}/requisitions?${query.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      return json.data;
+    }
+  } catch (err) {
+    console.warn('Network requisition fetch failed, using local store:', err);
+  }
+  let reqs = [...localStore.requisitions];
+  if (campId) reqs = reqs.filter(r => r.campId === campId);
+  if (volunteerId) reqs = reqs.filter(r => r.volunteerId === volunteerId);
+  if (status) reqs = reqs.filter(r => r.status === status);
+  return reqs;
+}
+
+/**
+ * Approve / Update Requisition Status
+ */
+export async function updateRequisitionAction(id, { status, notes }) {
+  try {
+    const res = await fetch(`${API_BASE}/requisitions/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, notes })
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.data;
+    }
+  } catch (err) {
+    console.warn('Network requisition update failed, updating local store:', err);
+  }
+  return localStore.updateRequisition(id, { status, notes });
+}
+
+/**
+ * Fetch Active Unacknowledged Notifications for Real-Time Popups
+ */
+export async function fetchActiveNotifications({ role = 'all', volunteerId = null } = {}) {
+  try {
+    const query = new URLSearchParams();
+    if (role) query.set('role', role);
+    if (volunteerId) query.set('volunteerId', volunteerId);
+    const res = await fetch(`${API_BASE}/notifications?${query.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      return json.data || [];
+    }
+  } catch (err) {
+    // offline
+  }
+  return localStore.notifications.filter(n => !n.acknowledged);
+}
+
+/**
+ * Acknowledge Notification
+ */
+export async function acknowledgeNotificationAction(id) {
+  try {
+    await fetch(`${API_BASE}/notifications/ack`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+  } catch (err) {
+    // offline
+  }
+  const notif = localStore.notifications.find(n => n.id === id);
+  if (notif) notif.acknowledged = true;
+  return true;
+}
+

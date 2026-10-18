@@ -3,7 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApp } from '../context/AppContext';
-import { fetchDuties, updateDutyStatusAction, queryGeminiAI } from '../lib/api';
+import { 
+  fetchDuties, 
+  updateDutyStatusAction, 
+  queryGeminiAI,
+  fetchMessages,
+  submitRequisitionAction,
+  fetchCamps
+} from '../lib/api';
 import { enqueueAction } from '../lib/offlineQueue';
 import { 
   UserCheck, 
@@ -23,12 +30,24 @@ import {
   Sparkles,
   Bot,
   Zap,
-  ShieldAlert
+  ShieldAlert,
+  Radio,
+  Package,
+  Plus,
+  X,
+  Send,
+  MessageSquare,
+  Droplet,
+  Utensils,
+  Pill,
+  HeartPulse
 } from 'lucide-react';
 
 export default function VolunteerDashboard() {
   const { isOnline, pendingSyncCount, syncNow, isSyncing, showToast } = useApp();
   const [duties, setDuties] = useState([]);
+  const [citizenMessages, setCitizenMessages] = useState([]);
+  const [camps, setCamps] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Gemini 2.5 Flash Field Safety State
@@ -37,14 +56,27 @@ export default function VolunteerDashboard() {
   );
   const [isAiSafetyLoading, setIsAiSafetyLoading] = useState(false);
 
+  // Volunteer Camp Resource Requisition Modal State
+  const [showReqModal, setShowReqModal] = useState(false);
+  const [reqCampId, setReqCampId] = useState('camp-3');
+  const [reqItem, setReqItem] = useState('water');
+  const [reqQty, setReqQty] = useState(150);
+  const [reqPriority, setReqPriority] = useState('critical');
+  const [reqNotes, setReqNotes] = useState('Urgent drinking water replenishment required for displaced families in Sector Delta 9.');
+  const [isSubmittingReq, setIsSubmittingReq] = useState(false);
+
+  // Active Volunteer ID & Name
+  const currentVolunteerId = 'vol-3';
+  const currentVolunteerName = 'Fatima Noor';
+
   const handleRunSafetyCheck = async () => {
     setIsAiSafetyLoading(true);
     showToast('Invoking Gemini 2.5 Flash field safety model...');
     try {
       const res = await queryGeminiAI({
         task: 'citizen_advisor',
-        prompt: `Provide tactical responder safety instructions for volunteer ${currentVolunteerName} assigned to ${duties.length} field duties in high-flood zone. Keep it concise, practical, and directive.`,
-        context: { volunteerId: currentVolunteerId, dutiesCount: duties.length }
+        prompt: `Provide tactical responder safety instructions for volunteer ${currentVolunteerName} assigned to ${duties.length} field duties and ${citizenMessages.length} inbound citizen SOS calls. Keep it concise, practical, and directive.`,
+        context: { volunteerId: currentVolunteerId, dutiesCount: duties.length, messagesCount: citizenMessages.length }
       });
       if (res?.response) {
         setAiSafetyAdvice(res.response);
@@ -57,46 +89,78 @@ export default function VolunteerDashboard() {
     }
   };
 
-  // Mock current logged-in volunteer: Fatima Noor (vol-3) or Ahmed Raza (vol-2)
-  const currentVolunteerId = 'vol-3';
-  const currentVolunteerName = 'Fatima Noor';
-
-  const loadDuties = async () => {
-    setLoading(true);
+  const loadData = async () => {
     try {
-      const allDuties = await fetchDuties();
-      // Show assigned duties for this volunteer plus general open tasks
+      const [allDuties, allMsgs, allCamps] = await Promise.all([
+        fetchDuties(),
+        fetchMessages({ volunteerId: currentVolunteerId }),
+        fetchCamps()
+      ]);
       setDuties(allDuties);
+      setCitizenMessages(allMsgs);
+      if (allCamps && allCamps.length > 0) {
+        setCamps(allCamps);
+        if (!reqCampId) setReqCampId(allCamps[0].id);
+      }
     } catch (err) {
-      console.error('Failed to load volunteer duties:', err);
+      console.error('Failed to load volunteer data:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadDuties();
+    loadData();
+    // Real-time polling every 3 seconds for inbound citizen messages and duty dispatches
+    const interval = setInterval(() => {
+      fetchMessages({ volunteerId: currentVolunteerId }).then(setCitizenMessages).catch(() => {});
+      fetchDuties().then(setDuties).catch(() => {});
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleStatusChange = async (dutyId, nextStatus) => {
     if (!isOnline) {
-      // Offline mode: enqueue to IndexedDB
       await enqueueAction({
         type: 'duty_status',
         payload: { dutyId, status: nextStatus },
         timestamp: new Date().toISOString()
       });
-      // Optimistic local update
       setDuties(prev => prev.map(d => d.id === dutyId ? { ...d, status: nextStatus } : d));
       showToast(`Offline action saved to IndexedDB! Pending sync badge incremented.`, 'warning');
     } else {
       try {
         await updateDutyStatusAction(dutyId, nextStatus);
         showToast(`Duty status updated to ${nextStatus}.`, 'success');
-        await loadDuties();
+        await loadData();
       } catch (err) {
         showToast(`Failed: ${err.message}`, 'error');
       }
+    }
+  };
+
+  // Submit Resource Requisition to Camp Manager & Admin
+  const handleRequisitionSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmittingReq(true);
+    try {
+      const selectedCamp = camps.find(c => c.id === reqCampId) || { name: 'Camp 3 (Khanpur Valley)', id: reqCampId };
+      await submitRequisitionAction({
+        volunteerId: currentVolunteerId,
+        volunteerName: currentVolunteerName,
+        campId: selectedCamp.id,
+        campName: selectedCamp.name,
+        items: [{ item: reqItem, quantity: Number(reqQty), unit: reqItem === 'water' ? 'Liters' : 'Packs' }],
+        priority: reqPriority,
+        notes: reqNotes
+      });
+      showToast(`Requisition for ${reqQty} ${reqItem} broadcast to Camp Manager & Admin Command!`, 'success');
+      setShowReqModal(false);
+    } catch (err) {
+      showToast(`Requisition failed: ${err.message}`, 'error');
+    } finally {
+      setIsSubmittingReq(false);
     }
   };
 
@@ -136,8 +200,17 @@ export default function VolunteerDashboard() {
           </div>
         </div>
 
-        {/* Connectivity & Offline Queue Status Bar */}
+        {/* Connectivity, Actions & Sync Bar */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* 1-Click Request Camp Supplies */}
+          <button
+            onClick={() => setShowReqModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:brightness-110 shadow-xs transition"
+          >
+            <Package className="w-3.5 h-3.5" />
+            <span>Request Camp Supplies</span>
+          </button>
+
           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-bold border ${
             isOnline ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700' : 'bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-700 animate-pulse'
           }`}>
@@ -194,6 +267,68 @@ export default function VolunteerDashboard() {
             {aiSafetyAdvice}
           </div>
         </div>
+      </div>
+
+      {/* REAL-TIME INBOUND CITIZEN DISTRESS SOS FEED */}
+      <div className="bg-white dark:bg-slate-900 rounded-lg p-3.5 sm:p-4 border border-red-500/30 dark:border-red-500/40 shadow-xs space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <Radio className="w-4 h-4 text-red-500 animate-pulse" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono">
+              INBOUND CITIZEN DISTRESS SOS // LIVE P2P MESH ({citizenMessages.length})
+            </h2>
+          </div>
+          <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+            LIVE POLLING (3s)
+          </span>
+        </div>
+
+        {citizenMessages.length === 0 ? (
+          <div className="p-6 text-center text-xs text-slate-400 font-mono space-y-1">
+            <p>No active citizen distress messages currently routed to your unit.</p>
+            <p className="text-[11px] text-slate-500">Listening on Bluetooth mesh beacon for inbound emergency packets...</p>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {citizenMessages.map((msg) => (
+              <div 
+                key={msg.id} 
+                className="p-3 rounded-lg border border-red-500/20 bg-red-50/50 dark:bg-red-950/20 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all hover:border-red-500/40"
+              >
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-600 text-white uppercase tracking-wider">
+                      {msg.category || 'CITIZEN SOS'}
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300">
+                      From: {msg.senderName || 'Affected Citizen'}
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      • {new Date(msg.createdAt).toLocaleTimeString()}
+                    </span>
+                  </div>
+
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {msg.text}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-bold">Mesh Route:</span>
+                    <span>{msg.hopRoute || 'Bluetooth Low Energy P2P Peer Mesh'}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-start md:self-center">
+                  <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Delivered to Volunteer
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Quick Field Access Links: Map and Camps */}
@@ -254,7 +389,7 @@ export default function VolunteerDashboard() {
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-slate-700 dark:text-slate-300" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 font-mono">
-              ASSIGNED DUTIES ({duties.length})
+              ASSIGNED DUTIES &amp; CONVOYS ({duties.length})
             </h2>
           </div>
         </div>
@@ -282,20 +417,20 @@ export default function VolunteerDashboard() {
                       {duty.status.replace('_', ' ')}
                     </span>
                     <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                      Type: {duty.type.toUpperCase()}
+                      Type: {(duty.type || 'duty').toUpperCase()}
                     </span>
                   </div>
 
                   <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {duty.instructions}
+                    {duty.instructions || duty.title || duty.notes}
                   </h4>
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                    <span>Target: <strong className="text-slate-800 dark:text-slate-300">{duty.toName || duty.toId}</strong></span>
+                    <span>Target: <strong className="text-slate-800 dark:text-slate-300">{duty.toName || duty.toId || duty.location || 'Field Zone'}</strong></span>
                     <span>•</span>
                     <span>Assigned to: <strong className="text-slate-800 dark:text-slate-300">{duty.volunteerName}</strong></span>
                     <span>•</span>
-                    <span>Updated: {new Date(duty.updatedAt).toLocaleTimeString()}</span>
+                    <span>Updated: {new Date(duty.updatedAt || duty.createdAt || Date.now()).toLocaleTimeString()}</span>
                   </div>
                 </div>
 
@@ -330,6 +465,130 @@ export default function VolunteerDashboard() {
           })}
         </div>
       </div>
+
+      {/* REQUEST CAMP RESOURCES MODAL */}
+      {showReqModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 max-w-lg w-full shadow-2xl space-y-4 animate-scaleUp">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-amber-500" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase font-mono">
+                  REQUEST CAMP SUPPLIES // FIELD REQUISITION
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowReqModal(false)}
+                className="text-slate-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleRequisitionSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Target Camp
+                </label>
+                <select
+                  value={reqCampId}
+                  onChange={(e) => setReqCampId(e.target.value)}
+                  className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                >
+                  {camps.map(c => (
+                    <option key={c.id} value={c.id}>{c.name} ({c.valley || 'Sector'})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Resource Category
+                  </label>
+                  <select
+                    value={reqItem}
+                    onChange={(e) => setReqItem(e.target.value)}
+                    className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  >
+                    <option value="water">Drinking Water (Liters)</option>
+                    <option value="food">Food Rations (Meals)</option>
+                    <option value="medicine">Trauma Kits (Packs)</option>
+                    <option value="relief">Blankets &amp; Bedding</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Quantity Needed
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={reqQty}
+                    onChange={(e) => setReqQty(e.target.value)}
+                    className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Urgency Level
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['critical', 'high', 'normal'].map(lvl => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => setReqPriority(lvl)}
+                      className={`py-1.5 text-xs font-mono font-bold uppercase rounded border transition ${
+                        reqPriority === lvl
+                          ? lvl === 'critical' ? 'bg-red-500 text-white border-red-600' : lvl === 'high' ? 'bg-amber-500 text-white border-amber-600' : 'bg-blue-500 text-white border-blue-600'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                      }`}
+                    >
+                      {lvl}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Operational Reason / Notes
+                </label>
+                <textarea
+                  rows={2}
+                  value={reqNotes}
+                  onChange={(e) => setReqNotes(e.target.value)}
+                  className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-sans text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowReqModal(false)}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-mono text-slate-400 hover:text-white transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReq}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 shadow-md transition disabled:opacity-50"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{isSubmittingReq ? 'Transmitting...' : 'Transmit Requisition'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

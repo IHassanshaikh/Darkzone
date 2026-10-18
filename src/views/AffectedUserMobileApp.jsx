@@ -41,7 +41,7 @@ import {
   RefreshCw,
   Bot
 } from 'lucide-react';
-import { submitReportAction, queryGeminiAI } from '../lib/api';
+import { submitReportAction, sendMessageAction, queryGeminiAI } from '../lib/api';
 
 // Dynamically import Leaflet map with ssr: false
 const MobileOfflineMap = dynamic(() => import('../components/MobileOfflineMap'), {
@@ -255,6 +255,22 @@ export default function AffectedUserMobileApp() {
       console.warn('Gemini advisor error:', err);
     });
 
+    // Transmit Citizen SOS directly to ReliefOS backend DB and Volunteers
+    try {
+      await sendMessageAction({
+        text: `[EMERGENCY SOS: ${title}] ${emergencyText}`,
+        category: title,
+        sender: 'citizen',
+        senderName: 'Citizen Mobile (Sector Delta 9)',
+        recipientId: selectedVolunteer?.id || 'vol-3',
+        recipientName: selectedVolunteer?.name || 'Sara Khan',
+        hopRoute: isMesh ? 'Your Phone → Peer Mobile (14m) → Volunteer Mobile → HQ' : 'Direct Cloud Upload',
+        urgency: urgencyLevel
+      });
+    } catch (apiErr) {
+      console.warn('API error sending message:', apiErr);
+    }
+
     if (isMesh) {
       showToast('No Wi-Fi: Traveling mobile-to-mobile via Bluetooth P2P...');
 
@@ -300,7 +316,7 @@ export default function AffectedUserMobileApp() {
             assistanceNeeded: title
           }
         });
-        showToast('Report received by Central Coordinator!');
+        showToast('Report received by Central Coordinator & Volunteer!');
       } catch (err) {
         console.warn('API error:', err);
       }
