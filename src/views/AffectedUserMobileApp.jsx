@@ -66,6 +66,17 @@ const MobileOfflineMap = dynamic(() => import('../components/MobileOfflineMap'),
   )
 });
 
+// Dynamically import ReliefOS Native Java Android App
+const ReliefOSJavaApp = dynamic(() => import('../components/ReliefOSJavaApp'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full min-h-[400px] bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-slate-700 font-mono text-xs text-center space-y-3">
+      <div className="w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
+      <span>Starting ReliefOS Native Android Engine (BLE Mesh)...</span>
+    </div>
+  )
+});
+
 const DEFAULT_USER_LOCATION = {
   lat: 24.8620,
   lng: 67.0340,
@@ -179,7 +190,8 @@ export default function AffectedUserMobileApp() {
   } = appContext;
   const router = useRouter();
 
-  // Pure Citizen / Camp Resident interface with direct portals integration
+  // Interface Mode: 'native_android' (ReliefOS Java App) vs 'citizen_hub' (Extended Citizen Hub & Portals)
+  const [appMode, setAppMode] = useState('native_android');
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'requests' | 'services' | 'map' | 'portals'
   const [hasWifi, setHasWifi] = useState(false); // Default: No Wi-Fi (Disaster scenario)
   const [mobileToMobileEnabled, setMobileToMobileEnabled] = useState(true); // Option: Travel Mobile-to-Mobile
@@ -452,6 +464,34 @@ export default function AffectedUserMobileApp() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Mode Switcher: Android Java App vs Citizen Hub */}
+          <div className="flex items-center bg-[#182C13] p-1 rounded-lg border border-[#436D34]/60">
+            <button
+              type="button"
+              onClick={() => setAppMode('native_android')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold transition-all ${
+                appMode === 'native_android'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Android Java App</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAppMode('citizen_hub')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold transition-all ${
+                appMode === 'citizen_hub'
+                  ? 'bg-gradient-to-r from-[#2D4A22] to-[#436D34] text-white shadow-sm'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Citizen Hub</span>
+            </button>
+          </div>
+
           {/* Framed View Toggle */}
           <button
             onClick={() => setIsFramedView(!isFramedView)}
@@ -487,12 +527,12 @@ export default function AffectedUserMobileApp() {
       </header>
 
       {/* Main Mobile Application Chassis */}
-      <div className={`w-full citizen-mobile-app ${isFramedView ? 'max-w-[400px] h-[870px] rounded-[48px] border-[10px] border-[#1E2E1A] shadow-2xl shadow-black/60 ring-1 ring-[#3D6130]' : 'h-screen max-w-full rounded-none border-none'} bg-[#F4F5EB] flex flex-col overflow-hidden relative transition-all`}>
+      <div className={`w-full citizen-mobile-app ${isFramedView ? 'max-w-[400px] h-[870px] rounded-[48px] border-[10px] border-[#1E2E1A] shadow-2xl shadow-black/60 ring-1 ring-[#3D6130]' : 'h-screen max-w-full rounded-none border-none'} bg-[#F8FAFC] flex flex-col overflow-hidden relative transition-all`}>
         
-        {/* Mobile Phone Status Bar with Forest Gradient */}
-        <div className="w-full flex items-center justify-between px-7 pt-3 pb-1 bg-gradient-to-r from-[#1C3315] via-[#2D4A22] to-[#3E6630] text-white text-[11px] font-sans font-bold select-none flex-shrink-0" style={{ color: '#ffffff' }}>
+        {/* Mobile Phone Status Bar */}
+        <div className="w-full flex items-center justify-between px-7 pt-3 pb-1 bg-slate-900 text-white text-[11px] font-sans font-bold select-none flex-shrink-0" style={{ color: '#ffffff' }}>
           <span style={{ color: '#ffffff' }}>9:41</span>
-          <div className="w-20 h-4 bg-[#182C13] rounded-full flex items-center justify-center border border-white/10">
+          <div className="w-20 h-4 bg-black rounded-full flex items-center justify-center border border-white/10">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           </div>
           <div className="flex items-center gap-1.5" style={{ color: '#ffffff' }}>
@@ -502,34 +542,45 @@ export default function AffectedUserMobileApp() {
           </div>
         </div>
 
-        {/* Forest Green Gradient Header (#1C3315 -> #2D4A22 -> #3E6630) */}
-        <div className="px-4 py-3 bg-gradient-to-r from-[#1C3315] via-[#2D4A22] to-[#3E6630] flex items-center justify-between flex-shrink-0 border-b border-[#436D34]/40 shadow-xs relative">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-md">
-              <Trees className="w-4 h-4 text-[#2D4A22]" strokeWidth={2.5} />
-            </div>
-            <div>
-              <div className="text-sm font-black text-white leading-tight" style={{ color: '#ffffff' }}>ReliefOS</div>
-              <div className="text-[10px] font-semibold text-[#D1DEC9] leading-tight" style={{ color: '#D1DEC9' }}>Camp Resident</div>
-            </div>
+        {/* NATIVE ANDROID JAVA SCREEN VS CITIZEN HUB */}
+        {appMode === 'native_android' ? (
+          <div className="flex-1 w-full h-full relative overflow-hidden flex flex-col bg-[#F8FAFC]">
+            <ReliefOSJavaApp onSwitchToHub={() => setAppMode('citizen_hub')} />
           </div>
+        ) : (
+          <>
+            {/* Forest Green Gradient Header (#1C3315 -> #2D4A22 -> #3E6630) */}
+            <div className="px-4 py-3 bg-gradient-to-r from-[#1C3315] via-[#2D4A22] to-[#3E6630] flex items-center justify-between flex-shrink-0 border-b border-[#436D34]/40 shadow-xs relative">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-md">
+                  <Trees className="w-4 h-4 text-[#2D4A22]" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <div className="text-sm font-black text-white leading-tight" style={{ color: '#ffffff' }}>ReliefOS</div>
+                  <div className="text-[10px] font-semibold text-[#D1DEC9] leading-tight" style={{ color: '#D1DEC9' }}>Camp Resident</div>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3">
-            {/* Bell with Notification Badge */}
-            <div className="relative cursor-pointer">
-              <Bell className="w-4 h-4 text-white" />
-              <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full text-[8.5px] font-bold text-white flex items-center justify-center shadow-xs" style={{ color: '#ffffff' }}>
-                1
-              </span>
-            </div>
+              <div className="flex items-center gap-2">
+                {/* Switch back to Android Native Screen */}
+                <button
+                  type="button"
+                  onClick={() => setAppMode('native_android')}
+                  className="px-2 py-0.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 text-[10px] font-bold flex items-center gap-1 transition-colors"
+                >
+                  <Smartphone className="w-3 h-3" />
+                  <span>Android App</span>
+                </button>
 
-            {/* Language / Resident Pill */}
-            <div className="px-2 py-0.5 rounded-full bg-white/20 border border-white/30 flex items-center gap-1 text-white text-[10.5px] font-bold backdrop-blur-xs" style={{ color: '#ffffff' }}>
-              <span style={{ color: '#ffffff' }}>EN</span>
-              <ChevronRight className="w-3 h-3 text-white" />
+                {/* Bell with Notification Badge */}
+                <div className="relative cursor-pointer">
+                  <Bell className="w-4 h-4 text-white" />
+                  <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full text-[8.5px] font-bold text-white flex items-center justify-center shadow-xs" style={{ color: '#ffffff' }}>
+                    1
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
         {/* NETWORK STATUS BANNER (WI-FI VS MOBILE-TO-MOBILE) */}
         <div className={`px-3.5 py-1.5 border-b flex items-center justify-between text-[11px] flex-shrink-0 ${
@@ -1392,6 +1443,8 @@ export default function AffectedUserMobileApp() {
             <span className="text-[9px] font-bold">Portals</span>
           </button>
         </div>
+          </>
+        )}
 
       </div>
 
