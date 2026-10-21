@@ -4,9 +4,12 @@ import { findUserByEmail, createUser, recordLogin } from '@/src/lib/sqliteDb';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, email, password, role = 'volunteer', phone, organization, location } = body;
+    const { name, email, password, role = 'volunteer', phone, organization, location } = body || {};
+    const trimmedName = (name || '').trim();
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const cleanPassword = (password || '').toString();
 
-    if (!name || !email || !password) {
+    if (!trimmedName || !normalizedEmail || !cleanPassword) {
       return NextResponse.json(
         { success: false, error: 'Name, email, and password are required fields.' },
         { status: 400 }
@@ -21,7 +24,7 @@ export async function POST(request) {
     }
 
     // Check if user already exists
-    const existing = findUserByEmail(email);
+    const existing = findUserByEmail(normalizedEmail);
     if (existing) {
       return NextResponse.json(
         { success: false, error: 'An account with this email already exists in local database.' },
@@ -30,13 +33,13 @@ export async function POST(request) {
     }
 
     const created = createUser({
-      name,
-      email,
-      password,
+      name: trimmedName,
+      email: normalizedEmail,
+      password: cleanPassword,
       role,
       phone: phone || '+1 (555) 000-0000',
-      organization: organization || 'ReliefOS Emergency Response Unit',
-      location: location || 'Field Sector 1'
+      organization: organization || (role === 'admin' ? 'Central Incident Command (NDMA)' : role === 'camp_manager' ? 'Camp Logistics & Relief Hub' : 'ReliefOS Emergency Response Unit'),
+      location: location || (role === 'admin' ? 'Central Operations Bunker' : role === 'camp_manager' ? 'Sector 4 Hope Camp' : 'Field Sector 1')
     });
 
     const themeAccent = created.theme_accent || (role === 'admin' ? 'red' : role === 'camp_manager' ? 'amber' : 'emerald');

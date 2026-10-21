@@ -13,7 +13,10 @@ export async function POST(request) {
       );
     }
 
-    const user = findUserByEmail(email);
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const cleanPassword = (password || '').toString();
+
+    const user = findUserByEmail(normalizedEmail);
 
     if (!user) {
       return NextResponse.json(
@@ -26,7 +29,7 @@ export async function POST(request) {
       );
     }
 
-    if (user.password !== password) {
+    if (user.password !== cleanPassword && user.password !== cleanPassword.trim()) {
       return NextResponse.json(
         {
           success: false,

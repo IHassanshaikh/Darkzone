@@ -78,3 +78,12 @@ INSERT OR REPLACE INTO users (id, name, email, password, role, phone, organizati
   'emerald',
   'First-responder EMT certified; field triage and offline reporting specialist.'
 );
+
+-- Registered during Hackathon Testing
+INSERT OR REPLACE INTO users (id, name, email, password, role, phone, organization, location, theme_accent) VALUES ('usr-vol-mvifn46s', 'Test Responder', 'test_responder@reliefos.org', 'password123', 'volunteer', '+1 (555) 000-0000', 'ReliefOS Emergency Response Unit', 'Field Sector 1', 'emerald');
+
+-- Registered during Hackathon Testing
+INSERT OR REPLACE INTO users (id, name, email, password, role, phone, organization, location, theme_accent) VALUES ('usr-cam-mvig399e', 'Dr. John Watson', 'john.watson@reliefos.org', 'securePass123', 'camp_manager', '+1 (555) 000-0000', 'Camp Logistics & Relief Hub', 'Sector 4 Hope Camp', 'amber');
+
+-- Registered during Hackathon Testing
+INSERT OR REPLACE INTO users (id, name, email, password, role, phone, organization, location, theme_accent) VALUES ('usr-adm-mvig7hhe', 'Commander Maria Santos', 'maria.santos@reliefos.org', 'passMaria123', 'admin', '+1 (555) 000-0000', 'ReliefOS Rapid Volunteer', 'Forward Zone Alpha', 'red');

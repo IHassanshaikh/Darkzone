@@ -109,6 +109,18 @@ export function createUser({ name, email, password, role = 'volunteer', phone = 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       stmt.run(id, name, normalizedEmail, password, role, phone, organization, location, theme_accent);
+
+      // Also append to local reliefos.sql file so judges see their account in the physical SQL file
+      try {
+        const sqlPath = path.join(process.cwd(), 'reliefos.sql');
+        if (fs.existsSync(sqlPath)) {
+          const sqlInsert = `\n-- Registered during Hackathon Testing\nINSERT OR REPLACE INTO users (id, name, email, password, role, phone, organization, location, theme_accent) VALUES ('${id}', '${name.replace(/'/g, "''")}', '${normalizedEmail}', '${password.replace(/'/g, "''")}', '${role}', '${(phone || '').replace(/'/g, "''")}', '${(organization || '').replace(/'/g, "''")}', '${(location || '').replace(/'/g, "''")}', '${theme_accent}');\n`;
+          fs.appendFileSync(sqlPath, sqlInsert, 'utf8');
+        }
+      } catch (err) {
+        console.warn('[SQLite append to SQL file error]:', err.message);
+      }
+
       return { id, name, email: normalizedEmail, role, phone, organization, location, theme_accent };
     } catch (e) {
       console.warn('[SQLite createUser error]:', e.message);
@@ -126,7 +138,7 @@ export function createUser({ name, email, password, role = 'volunteer', phone = 
   try {
     const sqlPath = path.join(process.cwd(), 'reliefos.sql');
     if (fs.existsSync(sqlPath)) {
-      const sqlInsert = `\n-- Registered during Hackathon Testing\nINSERT OR REPLACE INTO users (id, name, email, password, role, phone, organization, location, theme_accent) VALUES ('${id}', '${name.replace(/'/g, "''")}', '${normalizedEmail}', '${password.replace(/'/g, "''")}', '${role}', '${phone.replace(/'/g, "''")}', '${organization.replace(/'/g, "''")}', '${location.replace(/'/g, "''")}', '${theme_accent}');\n`;
+      const sqlInsert = `\n-- Registered during Hackathon Testing\nINSERT OR REPLACE INTO users (id, name, email, password, role, phone, organization, location, theme_accent) VALUES ('${id}', '${name.replace(/'/g, "''")}', '${normalizedEmail}', '${password.replace(/'/g, "''")}', '${role}', '${(phone || '').replace(/'/g, "''")}', '${(organization || '').replace(/'/g, "''")}', '${(location || '').replace(/'/g, "''")}', '${theme_accent}');\n`;
       fs.appendFileSync(sqlPath, sqlInsert, 'utf8');
     }
   } catch (err) {

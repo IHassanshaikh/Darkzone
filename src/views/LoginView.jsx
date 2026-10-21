@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useApp } from '../context/AppContext';
+import { ROLE_HOMEPAGES, getRouteAllowedRoles } from '../components/AuthGuard';
 import { Mail, Lock, User, ShieldAlert, ShieldCheck, Tent, UserCheck } from 'lucide-react';
 
 const PRESETS = [
@@ -11,7 +13,9 @@ const PRESETS = [
 ];
 
 export default function LoginView({ targetRestrictedRoute = null, onDismiss = null }) {
-  const { login, quickLogin, signup, changeThemeAccent } = useApp();
+  const { user, login, quickLogin, signup, changeThemeAccent } = useApp();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [email, setEmail] = useState('admin@reliefos.org');
@@ -23,7 +27,7 @@ export default function LoginView({ targetRestrictedRoute = null, onDismiss = nu
     name: '',
     email: '',
     password: '',
-    role: 'volunteer',
+    role: 'admin',
     phone: '',
     organization: 'ReliefOS Rapid Volunteer',
     location: 'Forward Zone Alpha'
@@ -34,21 +38,51 @@ export default function LoginView({ targetRestrictedRoute = null, onDismiss = nu
   const [showSqlViewer, setShowSqlViewer] = useState(false);
   const [rawSql, setRawSql] = useState('');
 
-  // Handle Preset Click: Fills input & changes theme color on every click!
+  // Routing helper after successful authentication
+  const navigateAfterAuth = (authenticatedUser) => {
+    const userRole = authenticatedUser?.role || 'volunteer';
+    if (onDismiss) {
+      onDismiss();
+    }
+
+    if (targetRestrictedRoute && targetRestrictedRoute !== '/login') {
+      const allowed = getRouteAllowedRoles(targetRestrictedRoute);
+      if (allowed.includes(userRole)) {
+        router.push(targetRestrictedRoute);
+        return;
+      }
+    }
+
+    const dest = ROLE_HOMEPAGES[userRole] || '/';
+    router.push(dest);
+  };
+
+  // If user is already authenticated (e.g. from storage or prior session), redirect away from login
+  useEffect(() => {
+    if (user) {
+      navigateAfterAuth(user);
+    }
+  }, [user]);
+
+  // Handle Preset Click: In Login mode triggers quick login & redirects; in Signup mode selects role
   const handlePresetClick = async (preset) => {
     setActiveRole(preset.role);
-    setEmail(preset.email);
-    setPassword(preset.password);
     setErrorMsg('');
-
-    // Dynamic theme color change on every click
     changeThemeAccent(preset.accent);
 
-    // Quick login directly
+    if (mode === 'signup') {
+      // In signup mode, clicking a role button sets the target registration role
+      setSignupData(prev => ({ ...prev, role: preset.role }));
+      return;
+    }
+
+    // In login mode, fill preset credentials and execute 1-click login
+    setEmail(preset.email);
+    setPassword(preset.password);
     setIsLoading(true);
     try {
-      await quickLogin(preset.role);
-      if (onDismiss) onDismiss();
+      const loggedUser = await quickLogin(preset.role);
+      navigateAfterAuth(loggedUser);
     } catch (err) {
       setErrorMsg(err.message || 'Login failed');
     } finally {
@@ -61,8 +95,8 @@ export default function LoginView({ targetRestrictedRoute = null, onDismiss = nu
     setIsLoading(true);
     setErrorMsg('');
     try {
-      await login(email, password);
-      if (onDismiss) onDismiss();
+      const loggedUser = await login(email, password);
+      navigateAfterAuth(loggedUser);
     } catch (err) {
       setErrorMsg(err.message || 'Invalid email or password');
     } finally {
@@ -75,12 +109,27 @@ export default function LoginView({ targetRestrictedRoute = null, onDismiss = nu
     setIsLoading(true);
     setErrorMsg('');
     try {
-      await signup(signupData);
-      if (onDismiss) onDismiss();
+      const createdUser = await signup({
+        ...signupData,
+        role: signupData.role || activeRole
+      });
+      navigateAfterAuth(createdUser);
     } catch (err) {
       setErrorMsg(err.message || 'Signup failed');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSwitchTab = (newMode) => {
+    setMode(newMode);
+    setErrorMsg('');
+    if (newMode === 'login') {
+      const p = PRESETS.find(pr => pr.role === activeRole) || PRESETS[0];
+      setEmail(p.email);
+      setPassword(p.password);
+    } else {
+      setSignupData(prev => ({ ...prev, role: activeRole }));
     }
   };
 
@@ -163,7 +212,8 @@ export default function LoginView({ targetRestrictedRoute = null, onDismiss = nu
           <div className="flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1 text-xs">
             <button
               type="button"
-              onClick={() => { setMode('login'); setErrorMsg(''); }}
+              id="tab-signin"
+              onClick={() => handleSwitchTab('login')}
               className={`flex-1 py-1.5 rounded-md font-bold transition-colors ${
                 mode === 'login'
                   ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
@@ -174,7 +224,8 @@ export default function LoginView({ targetRestrictedRoute = null, onDismiss = nu
             </button>
             <button
               type="button"
-              onClick={() => { setMode('signup'); setErrorMsg(''); }}
+              id="tab-signup"
+              onClick={() => handleSwitchTab('signup')}
               className={`flex-1 py-1.5 rounded-md font-bold transition-colors ${
                 mode === 'signup'
                   ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
@@ -242,25 +293,27 @@ export default function LoginView({ targetRestrictedRoute = null, onDismiss = nu
             /* Simple Sign Up Form */
             <form onSubmit={handleSignupSubmit} className="space-y-2.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Name</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
                 <input
+                  id="signup-name"
                   type="text"
                   required
                   value={signupData.name}
                   onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                  placeholder="Full name"
+                  placeholder="e.g. Dr. Alex Mercer"
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
                 <input
+                  id="signup-email"
                   type="email"
                   required
                   value={signupData.email}
                   onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                  placeholder="name@email.com"
+                  placeholder="responder@reliefos.org"
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
                 />
               </div>
@@ -268,34 +321,43 @@ export default function LoginView({ targetRestrictedRoute = null, onDismiss = nu
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
                 <input
+                  id="signup-password"
                   type="password"
                   required
                   value={signupData.password}
                   onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                  placeholder="Password"
+                  placeholder="Create password"
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Role</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Clearance Role</label>
                 <select
+                  id="signup-role"
                   value={signupData.role}
-                  onChange={(e) => setSignupData({ ...signupData, role: e.target.value })}
+                  onChange={(e) => {
+                    const r = e.target.value;
+                    setSignupData({ ...signupData, role: r });
+                    setActiveRole(r);
+                    const p = PRESETS.find(pr => pr.role === r);
+                    if (p) changeThemeAccent(p.accent);
+                  }}
                   className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
                 >
-                  <option value="volunteer">Volunteer</option>
-                  <option value="camp_manager">Camp Manager</option>
-                  <option value="admin">Admin</option>
+                  <option value="admin">Admin (Rescue Commander)</option>
+                  <option value="camp_manager">Camp Manager (Logistics & Relief Hubs)</option>
+                  <option value="volunteer">Volunteer (Field Scout / Paramedic)</option>
                 </select>
               </div>
 
               <button
                 type="submit"
+                id="btn-signup-submit"
                 disabled={isLoading}
                 className="w-full py-2 rounded-lg theme-accent-bg font-bold text-xs shadow-sm hover:opacity-95 transition-opacity"
               >
-                {isLoading ? 'Creating...' : 'Sign Up & Login'}
+                {isLoading ? 'Creating Account...' : 'Sign Up & Launch Command'}
               </button>
             </form>
           )}

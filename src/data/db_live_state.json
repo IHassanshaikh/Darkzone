@@ -508,7 +508,7 @@
       ],
       "targetVolunteerId": "vol-3",
       "link": "/volunteer",
-      "acknowledged": false,
+      "acknowledged": true,
       "timestamp": "2026-10-18T17:13:33.434Z",
       "meta": {
         "requisitionId": "req-seed-1"
@@ -525,7 +525,7 @@
       ],
       "targetVolunteerId": "vol-3",
       "link": "/volunteer",
-      "acknowledged": false,
+      "acknowledged": true,
       "timestamp": "2026-10-18T17:02:51.011Z",
       "meta": {
         "requisitionId": "req-seed-1"
@@ -563,66 +563,24 @@
   ],
   "activityLog": [
     {
-      "id": 1792343630144,
-      "kind": "duty",
-      "message": "Duty #613433 status updated to done.",
-      "timestamp": "2026-10-18T17:13:50.144Z",
-      "label": "Suggested"
-    },
-    {
-      "id": 1792343613434,
-      "kind": "approval",
-      "message": "Requisition req-seed-1 APPROVED by Camp Operations for Fatima Noor.",
-      "timestamp": "2026-10-18T17:13:33.434Z",
-      "label": "Confirmed"
-    },
-    {
-      "id": 1792343613163,
-      "kind": "duty",
-      "message": "Duty #duty-1 status updated to done.",
-      "timestamp": "2026-10-18T17:13:33.163Z",
-      "label": "Suggested"
-    },
-    {
-      "id": 1792342983710,
-      "kind": "duty",
-      "message": "Duty #duty-1 status updated to done.",
-      "timestamp": "2026-10-18T17:03:03.710Z",
-      "label": "Suggested"
-    },
-    {
-      "id": 1792342971011,
-      "kind": "approval",
-      "message": "Requisition req-seed-1 APPROVED by Camp Operations for Fatima Noor.",
-      "timestamp": "2026-10-18T17:02:51.011Z",
-      "label": "Confirmed"
-    },
-    {
-      "id": 1792340993876,
-      "kind": "citizen_sos",
-      "message": "Citizen SOS dispatched to Fatima Noor (Volunteer): \"Verified Persistent Message Across Reloads...\"",
-      "timestamp": "2026-10-18T16:29:53.876Z",
-      "label": "Urgent"
-    },
-    {
       "id": 1,
       "kind": "system",
       "message": "ReliefOS Next.js API Route Handlers active.",
-      "timestamp": "2026-10-18T16:29:53.728Z",
+      "timestamp": "2026-10-21T17:53:38.480Z",
       "label": null
     },
     {
       "id": 2,
       "kind": "dark_zone",
       "message": "Potential Dark Zone flagged in Delta Sector 9 (Area C) based on 98% reporting silence.",
-      "timestamp": "2026-10-18T16:29:53.728Z",
+      "timestamp": "2026-10-21T17:53:38.480Z",
       "label": "Suggested"
     },
     {
       "id": 3,
       "kind": "shortage",
       "message": "Critical water shortage detected at Camp B (Coastal School). Deficit: 160L.",
-      "timestamp": "2026-10-18T16:29:53.728Z",
+      "timestamp": "2026-10-21T17:53:38.480Z",
       "label": "Suggested"
     }
   ]

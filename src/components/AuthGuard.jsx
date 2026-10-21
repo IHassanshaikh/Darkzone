@@ -30,13 +30,13 @@ const ROUTE_RULES = [
   { prefix: '/login', roles: ['admin', 'camp_manager', 'volunteer'] },
 ];
 
-const ROLE_HOMEPAGES = {
+export const ROLE_HOMEPAGES = {
   admin: '/',
   camp_manager: '/camp-manager',
   volunteer: '/volunteer'
 };
 
-function getRouteAllowedRoles(pathname) {
+export function getRouteAllowedRoles(pathname) {
   if (!pathname || pathname === '/') {
     // Root dashboard is Rescue Coordinator (Admin) Command Center
     return ['admin'];
@@ -54,8 +54,13 @@ export default function AuthGuard({ children }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // If on explicit /login page, always render LoginView directly
+  // If on explicit /login page:
   if (pathname === '/login') {
+    if (user) {
+      const dest = ROLE_HOMEPAGES[role] || '/';
+      router.replace(dest);
+      return null;
+    }
     return <LoginView />;
   }
 
