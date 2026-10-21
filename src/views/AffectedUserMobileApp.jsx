@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { useApp } from '../context/AppContext';
 import { 
   Radio, 
   MapPin, 
@@ -39,7 +41,17 @@ import {
   ArrowRight,
   Sparkles,
   RefreshCw,
-  Bot
+  Bot,
+  Sliders,
+  LayoutDashboard,
+  UserCheck,
+  KeyRound,
+  Boxes,
+  FileSearch,
+  Truck,
+  Moon,
+  Sun,
+  Palette
 } from 'lucide-react';
 import { submitReportAction, sendMessageAction, fetchMessages, queryGeminiAI } from '../lib/api';
 
@@ -151,8 +163,24 @@ const NEARBY_CAMPS = [
 ];
 
 export default function AffectedUserMobileApp() {
-  // Pure Citizen / Camp Resident interface
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'requests' | 'services' | 'map'
+  const appContext = useApp() || {};
+  const { 
+    user, 
+    role, 
+    setIsAuthModalOpen, 
+    theme, 
+    toggleTheme, 
+    themeAccent, 
+    changeThemeAccent, 
+    cycleThemeAccent, 
+    isOnline, 
+    setIsOnline, 
+    logout
+  } = appContext;
+  const router = useRouter();
+
+  // Pure Citizen / Camp Resident interface with direct portals integration
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'requests' | 'services' | 'map' | 'portals'
   const [hasWifi, setHasWifi] = useState(false); // Default: No Wi-Fi (Disaster scenario)
   const [mobileToMobileEnabled, setMobileToMobileEnabled] = useState(true); // Option: Travel Mobile-to-Mobile
   const [isFramedView, setIsFramedView] = useState(true);
@@ -382,27 +410,52 @@ export default function AffectedUserMobileApp() {
     <div className="min-h-screen bg-gradient-to-br from-[#162711] via-[#223A1A] to-[#2D4A22] text-[#1A251B] flex flex-col items-center justify-start p-2 sm:p-4 select-none">
       
       {/* Top Navigation & Simulator Controls */}
-      <header className="w-full max-w-5xl flex items-center justify-between px-3 py-2 bg-[#233A1A]/95 border border-[#3B602D] rounded-xl text-xs font-mono text-[#D1DEC9] mb-3 shadow-md backdrop-blur-xs">
-        <div className="flex items-center gap-3">
+      <header className="w-full max-w-5xl flex flex-wrap items-center justify-between px-3 py-2 bg-[#233A1A]/95 border border-[#3B602D] rounded-xl text-xs font-mono text-[#D1DEC9] mb-3 shadow-md backdrop-blur-xs gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <Link 
             href="/" 
-            className="flex items-center gap-1.5 text-white hover:text-emerald-300 transition-colors font-bold"
+            title="Return to Incident Command Center Dashboard"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#182C13] hover:bg-[#2D4A22] text-white border border-[#436D34]/50 transition-colors font-bold"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>HQ Command Center</span>
+            <LayoutDashboard className="w-3.5 h-3.5 text-red-400" />
+            <span className="hidden sm:inline">Command HQ</span>
+            <span className="sm:hidden">HQ</span>
           </Link>
-          <span className="text-[#576356]">|</span>
-          <div className="flex items-center gap-1 text-emerald-400 font-bold">
-            <Smartphone className="w-3.5 h-3.5" />
-            <span>Citizen Mobile App</span>
-          </div>
+
+          <Link 
+            href="/volunteer" 
+            title="Open Volunteer Field Responder Portal"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#182C13] hover:bg-[#2D4A22] text-white border border-[#436D34]/50 transition-colors font-bold"
+          >
+            <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Volunteer Portal</span>
+          </Link>
+
+          <Link 
+            href="/camp-manager" 
+            title="Open Camp Operations & Logistics Portal"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#182C13] hover:bg-[#2D4A22] text-white border border-[#436D34]/50 transition-colors font-bold"
+          >
+            <Tent className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Camp Ops</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setIsAuthModalOpen && setIsAuthModalOpen(true)}
+            title="Open Clearance Settings & Role Authentication Modal"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#182C13] hover:bg-[#2D4A22] text-white border border-[#436D34]/50 transition-colors font-bold"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Settings</span>
+          </button>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Framed View Toggle */}
           <button
             onClick={() => setIsFramedView(!isFramedView)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gradient-to-r from-[#233F1B] via-[#2D4A22] to-[#385F2C] text-white border border-[#436D34]/60 hover:brightness-110 transition-all shadow-xs"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gradient-to-r from-[#233F1B] via-[#2D4A22] to-[#385F2C] text-white border border-[#436D34]/60 hover:brightness-110 transition-all shadow-xs font-bold"
           >
             {isFramedView ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
             <span className="hidden sm:inline">{isFramedView ? 'Full Screen' : 'Device Frame'}</span>
@@ -421,12 +474,12 @@ export default function AffectedUserMobileApp() {
             {!hasWifi ? (
               <>
                 <Smartphone className="w-3 h-3 text-amber-400 animate-pulse" />
-                <span>NO WI-FI (MOBILE-TO-MOBILE)</span>
+                <span>NO WI-FI (BLE MESH)</span>
               </>
             ) : (
               <>
                 <Wifi className="w-3 h-3 text-emerald-400" />
-                <span>WI-FI CONNECTED (CLOUD)</span>
+                <span>WI-FI CONNECTED</span>
               </>
             )}
           </button>
@@ -1079,10 +1132,215 @@ export default function AffectedUserMobileApp() {
             </div>
           )}
 
+          {/* ======================================================== */}
+          {/* TAB 5: PORTALS & DISASTER SETTINGS HUB */}
+          {/* ======================================================== */}
+          {activeTab === 'portals' && (
+            <div className="space-y-3 pb-2">
+              
+              {/* CURRENT ACTIVE IDENTITY & CLEARANCE CARD */}
+              <div className="bg-white rounded-2xl border border-[#D5DCB8] p-3.5 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-[#576356]">
+                    Active Session Mode
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E8F0DC] text-[#2D4A22] border border-[#CBD8BA]">
+                    {user ? `${user.role.toUpperCase()}` : 'CIVILIAN MODE'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1C3315] via-[#2D4A22] to-[#3E6630] flex items-center justify-center text-white font-black text-sm shadow-sm">
+                    {user?.name ? user.name.slice(0, 2).toUpperCase() : 'CZ'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-black text-slate-900 truncate">
+                      {user?.name || 'Affected Resident / Citizen'}
+                    </div>
+                    <div className="text-[10.5px] text-slate-500 truncate font-mono">
+                      {user?.email || 'Sector Delta 9 (Lowland Floods)'}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsAuthModalOpen && setIsAuthModalOpen(true)}
+                  className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#1C3315] via-[#2D4A22] to-[#385F2C] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm hover:brightness-110 transition-all"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Switch Clearance Profile / Login</span>
+                </button>
+              </div>
+
+              {/* OPERATIONAL PORTALS DIRECT JUMP SECTION */}
+              <div className="bg-white rounded-2xl border border-[#E4E7D7] p-3 shadow-xs space-y-2">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                  <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                    <LayoutDashboard className="w-3.5 h-3.5 text-[#2D4A22]" />
+                    <span>ReliefOS Dashboards & Portals</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-700 font-bold">1-Click Access</span>
+                </div>
+
+                <div className="space-y-1.5">
+                  {/* 1. Volunteer Portal */}
+                  <Link
+                    href="/volunteer"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-emerald-200/60 bg-emerald-50/50 hover:bg-emerald-100/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
+                        <UserCheck className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <span>Volunteer Responder Portal</span>
+                          <span className="text-[9px] font-mono px-1 rounded bg-emerald-200 text-emerald-800 font-bold">FIELD</span>
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate">
+                          Assigned duties, citizen SOS feed, offline mesh triage
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-emerald-700 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+
+                  {/* 2. Command HQ Dashboard */}
+                  <Link
+                    href="/"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-red-200/60 bg-red-50/50 hover:bg-red-100/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-red-600 text-white flex items-center justify-center flex-shrink-0">
+                        <LayoutDashboard className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <span>HQ Incident Command Center</span>
+                          <span className="text-[9px] font-mono px-1 rounded bg-red-200 text-red-800 font-bold">ADMIN</span>
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate">
+                          Dark Zone disparity map, AI briefing & resource dispatch
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-red-700 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+
+                  {/* 3. Camp Manager Operations */}
+                  <Link
+                    href="/camp-manager"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-amber-200/60 bg-amber-50/50 hover:bg-amber-100/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-amber-600 text-white flex items-center justify-center flex-shrink-0">
+                        <Tent className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <span>Camp Operations & Logistics</span>
+                          <span className="text-[9px] font-mono px-1 rounded bg-amber-200 text-amber-800 font-bold">CAMP MGR</span>
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate">
+                          Refugee intake registry, water deficit alerts & ration burn rate
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+
+                  {/* 4. Resources & Relief Hubs */}
+                  <Link
+                    href="/resources"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-blue-200/60 bg-blue-50/50 hover:bg-blue-100/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900">
+                          Regional Stock Inventory
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate">
+                          Capacity bars across 4 regional disaster relief depots
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-blue-700 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+
+                  {/* 5. Distress Triage */}
+                  <Link
+                    href="/triage"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-purple-200/60 bg-purple-50/50 hover:bg-purple-100/60 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center flex-shrink-0">
+                        <FileSearch className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900">
+                          Distress Report Triage
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate">
+                          Automated entity extraction and Gemini 2.5 Flash classification
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-purple-700 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* SYSTEM PREFERENCES & CONTROLS */}
+              <div className="bg-white rounded-2xl border border-[#E4E7D7] p-3 shadow-xs space-y-2.5 text-xs">
+                <span className="font-black text-slate-900 flex items-center gap-1.5">
+                  <Sliders className="w-3.5 h-3.5 text-[#2D4A22]" />
+                  <span>Display & Network Controls</span>
+                </span>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleTheme && toggleTheme()}
+                    className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center gap-2 text-left font-bold text-slate-800 transition-colors"
+                  >
+                    {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-indigo-500" />}
+                    <div className="text-[11px] leading-tight">
+                      <div>Theme Mode</div>
+                      <span className="text-[10px] font-normal text-slate-500 capitalize">{theme || 'light'}</span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => cycleThemeAccent && cycleThemeAccent()}
+                    className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center gap-2 text-left font-bold text-slate-800 transition-colors"
+                  >
+                    <Palette className="w-4 h-4 text-emerald-600" />
+                    <div className="text-[11px] leading-tight">
+                      <div>Color Accent</div>
+                      <span className="text-[10px] font-normal text-slate-500 uppercase">{themeAccent || 'red'}</span>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Local Database persistence badge */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-600 font-medium">Local SQLite Backend:</span>
+                  <span className="font-mono text-emerald-700 font-bold">reliefos.db (Ready)</span>
+                </div>
+              </div>
+
+            </div>
+          )}
+
         </div>
 
-        {/* 4-Tab Bottom Navigation Bar (Matching Screenshot 3) */}
-        <div className="h-14 bg-[#F5F6ED] border-t border-[#E2E6D5] flex items-center justify-around px-2 flex-shrink-0">
+        {/* 5-Tab Bottom Navigation Bar (Home | Requests | Services | Map | Portals) */}
+        <div className="h-14 bg-[#F5F6ED] border-t border-[#E2E6D5] flex items-center justify-around px-1 flex-shrink-0">
           <button
             onClick={() => setActiveTab('home')}
             className={`flex flex-col items-center gap-0.5 transition-colors ${
@@ -1090,7 +1348,7 @@ export default function AffectedUserMobileApp() {
             }`}
           >
             <Home className="w-4 h-4" strokeWidth={activeTab === 'home' ? 2.5 : 2} />
-            <span className="text-[9.5px] font-bold">Home</span>
+            <span className="text-[9px] font-bold">Home</span>
           </button>
 
           <button
@@ -1100,7 +1358,7 @@ export default function AffectedUserMobileApp() {
             }`}
           >
             <AlertTriangle className="w-4 h-4" strokeWidth={activeTab === 'requests' ? 2.5 : 2} />
-            <span className="text-[9.5px] font-bold">Requests</span>
+            <span className="text-[9px] font-bold">Requests</span>
           </button>
 
           <button
@@ -1110,7 +1368,7 @@ export default function AffectedUserMobileApp() {
             }`}
           >
             <CheckSquare className="w-4 h-4" strokeWidth={activeTab === 'services' ? 2.5 : 2} />
-            <span className="text-[9.5px] font-bold">Services</span>
+            <span className="text-[9px] font-bold">Services</span>
           </button>
 
           <button
@@ -1120,7 +1378,18 @@ export default function AffectedUserMobileApp() {
             }`}
           >
             <MapPin className="w-4 h-4" strokeWidth={activeTab === 'map' ? 2.5 : 2} />
-            <span className="text-[9.5px] font-bold">Map</span>
+            <span className="text-[9px] font-bold">Map</span>
+          </button>
+
+          <button
+            id="tab-portals-settings"
+            onClick={() => setActiveTab('portals')}
+            className={`flex flex-col items-center gap-0.5 transition-colors ${
+              activeTab === 'portals' ? 'text-[#2D4A22]' : 'text-[#7B8776]'
+            }`}
+          >
+            <Sliders className="w-4 h-4" strokeWidth={activeTab === 'portals' ? 2.5 : 2} />
+            <span className="text-[9px] font-bold">Portals</span>
           </button>
         </div>
 

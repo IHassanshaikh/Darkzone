@@ -139,14 +139,14 @@ export default function Navbar() {
             </button>
           )}
 
-          {/* Citizen SOS Mobile App Launcher */}
+          {/* Citizen User Portal Launcher */}
           <Link
             href="/mobile"
-            title="Launch User (Affected Person) Mobile Application"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors"
+            title="Launch Citizen / User Mobile Portal (Affected Resident Interface)"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors"
           >
             <Smartphone className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Citizen SOS App</span>
+            <span className="hidden sm:inline">Citizen Portal</span>
           </Link>
 
           {/* ROLE SWITCHER BUTTONS (Changes theme color dynamically on every click) */}

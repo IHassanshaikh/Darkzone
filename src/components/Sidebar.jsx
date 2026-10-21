@@ -29,7 +29,7 @@ const ALL_LINKS = [
   { to: '/verification', label: 'Field Verification',   icon: ClipboardCheck,  roles: ['admin'] },
   { to: '/triage',       label: 'Report Triage',        icon: FileSearch,      roles: ['admin'] },
   { to: '/admin',        label: 'Admin Panel',          icon: ShieldAlert,     roles: ['admin'] },
-  { to: '/mobile',       label: 'Citizen SOS App',      icon: Smartphone,      roles: ['admin', 'camp_manager', 'volunteer'] },
+  { to: '/mobile',       label: 'Citizen User Portal',  icon: Smartphone,      roles: ['admin'] },
 
   // Camp Manager
   { to: '/camp-manager', label: 'Camp Operations',      icon: LayoutDashboard, roles: ['camp_manager'] },
@@ -37,11 +37,13 @@ const ALL_LINKS = [
   { to: '/allocation',   label: 'Deliveries & Intake',  icon: Truck,           roles: ['camp_manager'] },
   { to: '/camps',        label: 'All Camps Overview',   icon: Tent,            roles: ['camp_manager'] },
   { to: '/field-map',    label: 'Field Map',            icon: Map,             roles: ['camp_manager'] },
+  { to: '/mobile',       label: 'Citizen User Portal',  icon: Smartphone,      roles: ['camp_manager'] },
 
   // Field Volunteer
   { to: '/volunteer',    label: 'My Duties',            icon: UserCheck,       roles: ['volunteer'] },
   { to: '/field-map',    label: 'Field Map',            icon: Map,             roles: ['volunteer'] },
   { to: '/camps',        label: 'Camps & Stock',        icon: Tent,            roles: ['volunteer'] },
+  { to: '/mobile',       label: 'Citizen User Portal',  icon: Smartphone,      roles: ['volunteer'] },
 ];
 
 const ROLE_META = {

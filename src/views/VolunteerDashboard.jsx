@@ -40,7 +40,8 @@ import {
   Droplet,
   Utensils,
   Pill,
-  HeartPulse
+  HeartPulse,
+  Smartphone
 } from 'lucide-react';
 
 const VOLUNTEER_PROFILES = [
@@ -244,6 +245,15 @@ export default function VolunteerDashboard() {
             <span>Request Camp Supplies</span>
           </button>
 
+          <Link
+            href="/mobile"
+            title="Open Citizen User Portal to inspect affected resident view or send test mesh packets"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#2D4A22] hover:bg-[#3E6630] text-white shadow-xs transition"
+          >
+            <Smartphone className="w-3 h-3 text-emerald-300" />
+            <span>Citizen User Portal</span>
+          </Link>
+
           <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-bold border ${
             isOnline ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700' : 'bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-700 animate-pulse'
           }`}>
@@ -311,10 +321,19 @@ export default function VolunteerDashboard() {
               INBOUND CITIZEN DISTRESS SOS // LIVE P2P MESH ({citizenMessages.length})
             </h2>
           </div>
-          <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-            LIVE POLLING (3s)
-          </span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/mobile"
+              className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+            >
+              <Smartphone className="w-3 h-3" />
+              <span>Open User Portal (/mobile)</span>
+            </Link>
+            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+              LIVE POLLING (3s)
+            </span>
+          </div>
         </div>
 
         {citizenMessages.length === 0 ? (

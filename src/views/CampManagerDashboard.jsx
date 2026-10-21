@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { useApp } from '../context/AppContext';
 import { 
   fetchCamps, 
@@ -38,6 +39,7 @@ import {
   HeartPulse,
   X,
   Bot,
+  Smartphone,
   Zap
 } from 'lucide-react';
 
@@ -410,6 +412,15 @@ export default function CampManagerDashboard() {
             <Send className="w-3 h-3" />
             <span>Requisition</span>
           </button>
+
+          <Link
+            href="/mobile"
+            title="Open Citizen User Portal to view resident distress feed and camp ration requests"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold bg-[#2D4A22] hover:bg-[#385F2C] text-white transition shadow-xs"
+          >
+            <Smartphone className="w-3 h-3 text-emerald-300" />
+            <span>Citizen Portal</span>
+          </Link>
 
           <button
             onClick={loadData}
