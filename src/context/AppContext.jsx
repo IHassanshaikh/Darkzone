@@ -367,12 +367,16 @@ export function AppProvider({ children }) {
 
     checkAlerts();
 
-    const handleSync = () => checkAlerts();
+    let syncTimeout = null;
+    const handleSync = () => {
+      if (syncTimeout) clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(checkAlerts, 1200);
+    };
     if (typeof window !== 'undefined') {
       window.addEventListener('reliefos_db_sync', handleSync);
       window.addEventListener('storage', handleSync);
     }
-    const pollInterval = setInterval(checkAlerts, 1500);
+    const pollInterval = setInterval(checkAlerts, 8000);
 
     return () => {
       isSubscribed = false;
@@ -380,6 +384,7 @@ export function AppProvider({ children }) {
         window.removeEventListener('reliefos_db_sync', handleSync);
         window.removeEventListener('storage', handleSync);
       }
+      if (syncTimeout) clearTimeout(syncTimeout);
       clearInterval(pollInterval);
     };
   }, [role, user]);

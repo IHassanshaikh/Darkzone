@@ -640,8 +640,13 @@ export default function AreaDetail({ id: propId }) {
 
           {/* Quick Sitrep Form */}
           <form onSubmit={handleAddReport} className="flex gap-2">
+            <label htmlFor="area-sitrep-input" className="sr-only">
+              Log emergency sitrep
+            </label>
             <input
               type="text"
+              id="area-sitrep-input"
+              name="areaSitrepInput"
               value={newReportText}
               onChange={(e) => setNewReportText(e.target.value)}
               placeholder={`Log emergency sitrep for ${area.name}... (e.g. 5 elderly residents stranded)`}

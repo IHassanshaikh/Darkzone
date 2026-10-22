@@ -31,13 +31,24 @@ export async function POST(request) {
     updatedAt: new Date().toISOString()
   };
 
-  db.duties.push(newDuty);
+  // Deduct transferred stock from donor camp so it doesn't get suggested repeatedly
+  const donorCamp = db.camps.find(c => c.id === suggestion.fromCampId);
+  if (donorCamp && Array.isArray(donorCamp.items)) {
+    const itm = donorCamp.items.find(i => (i.item || i.name || '').toLowerCase() === suggestion.item.toLowerCase());
+    if (itm && itm.stock !== undefined) {
+      itm.stock = Math.max(0, itm.stock - suggestion.quantity);
+    }
+  }
+
+  db.duties.unshift(newDuty);
   db.logActivity('allocation', `Transfer approved: ${suggestion.quantity} ${suggestion.item} from ${suggestion.fromCampName} to ${suggestion.toCampName}. Duty created.`);
+  db.saveToDisk();
 
   return NextResponse.json({
     data: {
       duty: newDuty,
-      deliveryStatus: 'Pending'
+      deliveryStatus: 'Pending',
+      approvedSuggestionId: suggestionId
     },
     meta: {}
   });

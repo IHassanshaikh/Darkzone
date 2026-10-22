@@ -165,9 +165,14 @@ export default function VolunteersDirectory() {
 
         {/* Search Input */}
         <div className="relative min-w-[200px]">
+          <label htmlFor="volunteer-search-input" className="sr-only">
+            Search Volunteers
+          </label>
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
           <input
             type="text"
+            id="volunteer-search-input"
+            name="volunteerSearchInput"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, skill, ID..."

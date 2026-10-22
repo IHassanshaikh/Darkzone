@@ -14,15 +14,13 @@ const ROUTE_RULES = [
   { prefix: '/areas', roles: ['admin'] },
   { prefix: '/triage', roles: ['admin'] },
   { prefix: '/reports', roles: ['admin'] },
-  { prefix: '/volunteers', roles: ['admin', 'volunteer'] },
+  { prefix: '/volunteers', roles: ['admin', 'volunteer', 'camp_manager'] },
 
-  // Admin and Camp Manager
-  { prefix: '/camp-manager', roles: ['admin', 'camp_manager'] },
-  { prefix: '/allocation', roles: ['admin', 'camp_manager'] },
-  { prefix: '/resources', roles: ['admin', 'camp_manager'] },
-
-  // Admin and Volunteer
-  { prefix: '/volunteer', roles: ['admin', 'volunteer'] },
+  // Operational Dashboards: Accessible to Admin, Camp Manager, and Field Volunteer
+  { prefix: '/camp-manager', roles: ['admin', 'camp_manager', 'volunteer'] },
+  { prefix: '/allocation', roles: ['admin', 'camp_manager', 'volunteer'] },
+  { prefix: '/resources', roles: ['admin', 'camp_manager', 'volunteer'] },
+  { prefix: '/volunteer', roles: ['admin', 'volunteer', 'camp_manager'] },
 
   // Shared routes
   { prefix: '/field-map', roles: ['admin', 'camp_manager', 'volunteer'] },

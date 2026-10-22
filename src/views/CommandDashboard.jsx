@@ -46,16 +46,16 @@ export default function CommandDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Gemini 2.5 Flash Disaster Intelligence State
+  // Dynamic AI Disaster Intelligence State
   const [aiBriefing, setAiBriefing] = useState(
-    'Gemini 2.5 Flash Situation Assessment: Delta Sector (Area C) shows a 98% reporting blackout indicating cellular tower collapse. Immediate recommendation: dispatch amphibious drone recon along North Canal corridor and pre-stage 500L emergency potable water at Camp B.'
+    'AI Autonomous Situation Assessment: Delta Sector (Area C) shows a 98% reporting blackout indicating cellular tower collapse. Immediate recommendation: dispatch amphibious drone recon along North Canal corridor and pre-stage 500L emergency potable water at Camp B.'
   );
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiLastUpdated, setAiLastUpdated] = useState('Active Synced');
 
   const handleGenerateAiBriefing = async () => {
     setIsAiLoading(true);
-    showToast('Querying Gemini 2.5 Flash for tactical situation briefing...');
+    showToast('Generating AI tactical situation briefing...');
     try {
       const res = await queryGeminiAI({
         task: 'dark_zone_analysis',
@@ -245,7 +245,7 @@ export default function CommandDashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-white uppercase tracking-wider">
-                  GEMINI 2.5 FLASH // TACTICAL SITUATION BRIEFING
+                  AI AUTONOMOUS SITUATION BRIEFING
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#2D4A22]/20 text-[#2D4A22] dark:text-emerald-300 font-bold border border-[#2D4A22]/30">
                   AI COPILOT ACTIVE

@@ -26,9 +26,9 @@ export default function FieldMap() {
   const [loading, setLoading] = useState(true);
   const [selectedCamp, setSelectedCamp] = useState(null);
 
-  // Gemini 2.5 Flash Recon State
+  // Dynamic AI Recon State
   const [aiReconIntel, setAiReconIntel] = useState(
-    'Gemini AI Recon Analysis: Delta Sector exhibits complete electromagnetic silence across 4 cell towers. Recommended UAV flight path: 24.8710° N, 67.0180° E along canal levee. Priority search for 40-60 stranded residents on isolated elevated rooftops.'
+    'AI Recon Analysis: Delta Sector exhibits complete electromagnetic silence across 4 cell towers. Recommended UAV flight path: 24.8710° N, 67.0180° E along canal levee. Priority search for 40-60 stranded residents on isolated elevated rooftops.'
   );
   const [isAiReconLoading, setIsAiReconLoading] = useState(false);
 
@@ -137,10 +137,10 @@ export default function FieldMap() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-white uppercase tracking-wider">
-                  GEMINI 2.5 FLASH // GEOSPATIAL RECON INTELLIGENCE
+                  AI GEOSPATIAL RECON INTELLIGENCE
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                  gemini-2.5-flash
+                  reliefos-ai
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">

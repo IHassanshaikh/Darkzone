@@ -27,7 +27,7 @@ export function haversineDistance(lat1, lon1, lat2, lon2) {
  * @param {Array} campItems 
  * @returns {Array} suggested transfers
  */
-export function generateAllocationSuggestions(camps = [], campItems = []) {
+export function generateAllocationSuggestions(camps = [], campItems = [], existingDuties = []) {
   const suggestions = [];
 
   // Index items by campId and item name
@@ -94,24 +94,35 @@ export function generateAllocationSuggestions(camps = [], campItems = []) {
           const transferQty = Math.min(shortage, best.surplus);
           const suggestionId = `${best.sourceCamp.id}:${destCamp.id}:${item}`;
 
-          suggestions.push({
-            id: suggestionId,
-            suggestionId,
-            fromCampId: best.sourceCamp.id,
-            fromCampName: best.sourceCamp.name,
-            toCampId: destCamp.id,
-            toCampName: destCamp.name,
-            item,
-            quantity: transferQty,
-            unit: item === 'water' ? 'L' : (item === 'food' ? 'rations' : 'kits'),
-            distanceKm: best.distanceKm,
-            reason: `Transfer ${transferQty} ${item} from ${best.sourceCamp.name} (${best.distanceKm} km away) to relieve ${destCamp.name}'s deficit.`,
-            shortageRatio: shortage / (destItem.need || 1),
-            peopleAffected: destCamp.occupancy || 0,
-            status: 'suggested',
-            label: 'Suggested',
-            createdAt: new Date().toISOString()
-          });
+          // If an active/in-progress delivery duty already exists for this donor-to-recipient route, skip
+          const hasInFlightDelivery = Array.isArray(existingDuties) && existingDuties.some(d => 
+            d.type === 'delivery' && 
+            d.status !== 'done' && 
+            (d.fromCampId === best.sourceCamp.id || d.fromCampName === best.sourceCamp.name) &&
+            (d.toId === destCamp.id || d.toName === destCamp.name) &&
+            (d.item || '').toLowerCase() === item.toLowerCase()
+          );
+
+          if (!hasInFlightDelivery) {
+            suggestions.push({
+              id: suggestionId,
+              suggestionId,
+              fromCampId: best.sourceCamp.id,
+              fromCampName: best.sourceCamp.name,
+              toCampId: destCamp.id,
+              toCampName: destCamp.name,
+              item,
+              quantity: transferQty,
+              unit: item === 'water' ? 'L' : (item === 'food' ? 'rations' : 'kits'),
+              distanceKm: best.distanceKm,
+              reason: `Transfer ${transferQty} ${item} from ${best.sourceCamp.name} (${best.distanceKm} km away) to relieve ${destCamp.name}'s deficit.`,
+              shortageRatio: shortage / (destItem.need || 1),
+              peopleAffected: destCamp.occupancy || 0,
+              status: 'suggested',
+              label: 'Suggested',
+              createdAt: new Date().toISOString()
+            });
+          }
         }
       }
     }

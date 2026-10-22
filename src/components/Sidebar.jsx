@@ -16,13 +16,16 @@ import {
   Map,
   Tent,
   ClipboardCheck,
-  Smartphone
+  Smartphone,
+  PlusCircle
 } from 'lucide-react';
 
 // All nav links with role access lists
 const ALL_LINKS = [
   // Admin / Rescue Coordinator
   { to: '/',              label: 'Dashboard',            icon: LayoutDashboard, roles: ['admin'] },
+  { to: '/camps',        label: 'Camps & Hubs',         icon: Tent,            roles: ['admin'] },
+  { to: '/camp-manager?tab=create-camp', label: '+ Create Camp', icon: PlusCircle, roles: ['admin'] },
   { to: '/resources',    label: 'Resources',            icon: Boxes,           roles: ['admin'] },
   { to: '/allocation',   label: 'Allocation & Delivery',icon: Truck,           roles: ['admin'] },
   { to: '/volunteers',   label: 'Volunteers',           icon: Users,           roles: ['admin', 'volunteer'] },
@@ -33,6 +36,7 @@ const ALL_LINKS = [
 
   // Camp Manager
   { to: '/camp-manager', label: 'Camp Operations',      icon: LayoutDashboard, roles: ['camp_manager'] },
+  { to: '/camp-manager?tab=create-camp', label: '+ Create Camp', icon: PlusCircle, roles: ['camp_manager'] },
   { to: '/resources',    label: 'Inventory & Stock',    icon: Boxes,           roles: ['camp_manager'] },
   { to: '/allocation',   label: 'Deliveries & Intake',  icon: Truck,           roles: ['camp_manager'] },
   { to: '/camps',        label: 'All Camps Overview',   icon: Tent,            roles: ['camp_manager'] },

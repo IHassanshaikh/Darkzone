@@ -24,9 +24,9 @@ export default function Resources() {
   const [camps, setCamps] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Gemini 2.5 Flash Inventory State
+  // Dynamic AI Inventory State
   const [aiInventoryBrief, setAiInventoryBrief] = useState(
-    'Gemini AI Inventory Synthesis: Camp B exhibits critical -160L drinking water deficit (burn rate: 1.5L/occupant/day under 280 residents). Camp A holds 340L surplus. Recommend approving 160L inter-camp transfer duty immediately to avoid total stockout within 18 hours.'
+    'AI Inventory Synthesis: Evaluating multi-hub stock balances. Camp B drinking water reserve is under burn rate threshold. Inter-camp transfers from Camp A surplus hub recommended to ensure uninterrupted supply.'
   );
   const [isAiInventoryLoading, setIsAiInventoryLoading] = useState(false);
 
@@ -99,7 +99,7 @@ export default function Resources() {
         </button>
       </div>
 
-      {/* GEMINI 2.5 FLASH INVENTORY BALANCING FORECASTER */}
+      {/* AI INVENTORY BALANCING FORECASTER */}
       <div className="rounded-xl border border-[#2D4A22]/30 bg-gradient-to-r from-[#1C3315]/10 via-[#2D4A22]/15 to-[#3E6630]/10 p-4 shadow-sm backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2D4A22]/20">
           <div className="flex items-center gap-2.5">
@@ -109,10 +109,10 @@ export default function Resources() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-white uppercase tracking-wider">
-                  GEMINI 2.5 FLASH // MULTI-HUB INVENTORY BALANCING
+                  AI MULTI-HUB INVENTORY BALANCING
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                  gemini-2.5-flash
+                  reliefos-ai
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">

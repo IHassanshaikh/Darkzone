@@ -7,7 +7,8 @@ import {
   approveAllocationAction, 
   fetchDuties,
   updateDutyStatusAction,
-  queryGeminiAI
+  queryGeminiAI,
+  skipSyncFor
 } from '../lib/api';
 import { 
   Truck, 
@@ -33,25 +34,26 @@ export default function AllocationDelivery() {
   const [duties, setDuties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [approvingId, setApprovingId] = useState(null);
+  const [approvedIds, setApprovedIds] = useState(new Set());
 
-  // Gemini 2.5 Flash Logistics State
+  // Dynamic AI Logistics State
   const [aiSupplyPlan, setAiSupplyPlan] = useState(
-    'Gemini AI Supply Chain Optimization: Direct 160L potable water from Camp A (High School) to Camp B (Coastal Center) via bypass route Highway 4. Avoid River Bridge corridor due to 1.2m standing water. Estimated transit time: 24 minutes.'
+    'AI Supply Chain Optimization: Analyzing inter-camp supply imbalances and flood-safe routes. Directing excess potable water from surplus hubs to deficit coastal shelters via bypass Highway 4. Estimated transit time: 24 minutes.'
   );
   const [isAiOptimizing, setIsAiOptimizing] = useState(false);
 
   const handleRunAiSupplyPlan = async () => {
     setIsAiOptimizing(true);
-    showToast('Invoking Gemini 2.5 Flash supply chain model...');
+    showToast('Calculating optimal supply chain corridors...');
     try {
       const res = await queryGeminiAI({
         task: 'camp_forecast',
-        prompt: `Evaluate ${suggestions.length} inter-camp transfer suggestions. Recommend the fastest convoy route, delivery window, and emergency safety instructions for drivers.`,
+        prompt: `Evaluate ${suggestions.length} inter-camp transfer suggestions. Recommend the fastest convoy route, delivery window, and emergency safety instructions for drivers avoiding waterlogged roads. Keep under 35 words.`,
         context: { suggestionsCount: suggestions.length, dutiesCount: duties.length }
       });
       if (res?.response) {
         setAiSupplyPlan(res.response);
-        showToast('Gemini AI supply routing updated!', 'success');
+        showToast('AI supply chain routing updated!', 'success');
       }
     } catch (err) {
       console.warn('AI supply error:', err);
@@ -81,11 +83,18 @@ export default function AllocationDelivery() {
   }, []);
 
   const handleApprove = async (suggestionId) => {
+    skipSyncFor(4000);
     setApprovingId(suggestionId);
+    setApprovedIds(prev => new Set([...prev, suggestionId]));
     try {
       const res = await approveAllocationAction(suggestionId);
       showToast('Transfer APPROVED! Delivery duty created with status: Pending.', 'success');
-      await loadData();
+      if (res?.duty) {
+        setDuties(prev => [res.duty, ...prev.filter(d => d.id !== res.duty.id)]);
+      }
+      setTimeout(async () => {
+        await loadData();
+      }, 1200);
     } catch (err) {
       showToast(`Approval failed: ${err.message}`, 'error');
     } finally {
@@ -95,14 +104,17 @@ export default function AllocationDelivery() {
 
   const handleUpdateDeliveryStatus = async (dutyId, nextStatus) => {
     // 1. Instant optimistic update
+    skipSyncFor(4000);
     setDuties(prev => prev.map(d => d.id === dutyId ? { ...d, status: nextStatus, updatedAt: new Date().toISOString() } : d));
     try {
       await updateDutyStatusAction(dutyId, nextStatus);
       showToast(`Delivery status updated to: ${nextStatus.replace('_', ' ')}.`, 'success');
-      const freshDuties = await fetchDuties();
-      if (Array.isArray(freshDuties)) {
-        setDuties(freshDuties.filter(d => d.type === 'delivery'));
-      }
+      setTimeout(async () => {
+        const freshDuties = await fetchDuties();
+        if (Array.isArray(freshDuties)) {
+          setDuties(freshDuties.filter(d => d.type === 'delivery'));
+        }
+      }, 1200);
     } catch (err) {
       showToast(`Failed to update status: ${err.message}`, 'error');
       await loadData();
@@ -136,7 +148,7 @@ export default function AllocationDelivery() {
         </div>
       </div>
 
-      {/* GEMINI 2.5 FLASH SUPPLY CHAIN OPTIMIZER */}
+      {/* AI SUPPLY CHAIN ROUTE OPTIMIZER */}
       <div className="rounded-xl border border-[#2D4A22]/30 bg-gradient-to-r from-[#1C3315]/10 via-[#2D4A22]/15 to-[#3E6630]/10 p-4 shadow-sm backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2D4A22]/20">
           <div className="flex items-center gap-2.5">
@@ -146,10 +158,10 @@ export default function AllocationDelivery() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-white uppercase tracking-wider">
-                  GEMINI 2.5 FLASH // SUPPLY CHAIN ROUTE OPTIMIZER
+                  AI AUTONOMOUS SUPPLY ROUTE OPTIMIZER
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                  gemini-2.5-flash
+                  reliefos-ai
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">
@@ -194,52 +206,75 @@ export default function AllocationDelivery() {
           </div>
         ) : (
           <div className="space-y-3">
-            {suggestions.map((sugg, i) => (
-              <div
-                key={sugg.id || i}
-                className="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
-              >
-                <div className="space-y-1.5 max-w-2xl">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
-                      Suggestion #{i + 1}
-                    </span>
-                    <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <Droplet className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                      {sugg.quantity} {sugg.unit} of {sugg.item.toUpperCase()}
-                    </span>
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                      Suggested
-                    </span>
+            {suggestions.map((sugg, i) => {
+              const suggKey = sugg.suggestionId || sugg.id;
+              const isApproved = approvedIds.has(suggKey) || duties.some(d => 
+                (d.fromCampId === sugg.fromCampId || d.fromCampName === sugg.fromCampName) &&
+                (d.toId === sugg.toCampId || d.toName === sugg.toCampName) &&
+                (d.item || '').toLowerCase() === (sugg.item || '').toLowerCase() &&
+                d.status !== 'done'
+              );
+
+              return (
+                <div
+                  key={suggKey || i}
+                  className={`p-5 rounded-lg bg-white dark:bg-slate-900 border transition-all shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                    isApproved ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/20' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                  }`}
+                >
+                  <div className="space-y-1.5 max-w-2xl">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
+                        Suggestion #{i + 1}
+                      </span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <Droplet className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                        {sugg.quantity} {sugg.unit} of {sugg.item.toUpperCase()}
+                      </span>
+                      <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                        isApproved
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                      }`}>
+                        {isApproved ? '✓ Transfer Approved' : 'Suggested'}
+                      </span>
+                    </div>
+
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                      <span className="text-blue-700 dark:text-blue-400">{sugg.fromCampName}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="text-red-700 dark:text-red-400">{sugg.toCampName}</span>
+                      <span className="text-xs text-slate-500 font-normal">
+                        ({sugg.distanceKm} km transit distance)
+                      </span>
+                    </p>
+
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                      {sugg.reason}
+                    </p>
                   </div>
 
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                    <span className="text-blue-700 dark:text-blue-400">{sugg.fromCampName}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="text-red-700 dark:text-red-400">{sugg.toCampName}</span>
-                    <span className="text-xs text-slate-500 font-normal">
-                      ({sugg.distanceKm} km transit distance)
-                    </span>
-                  </p>
-
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    {sugg.reason}
-                  </p>
+                  <div className="flex items-center gap-3 self-start md:self-center">
+                    {isApproved ? (
+                      <span className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700 shadow-xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span>Transfer Approved &amp; En Route</span>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(suggKey)}
+                        disabled={approvingId === suggKey}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors disabled:opacity-50"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>{approvingId === suggKey ? 'Approving...' : 'Approve Transfer'}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-
-                <div className="flex items-center gap-3 self-start md:self-center">
-                  <button
-                    type="button"
-                    onClick={() => handleApprove(sugg.suggestionId || sugg.id)}
-                    disabled={approvingId === (sugg.suggestionId || sugg.id)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors disabled:opacity-50"
-                  >
-                    <Check className="w-4 h-4" />
-                    <span>{approvingId === (sugg.suggestionId || sugg.id) ? 'Approving...' : 'Approve Transfer'}</span>
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

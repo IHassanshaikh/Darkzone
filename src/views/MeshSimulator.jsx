@@ -34,9 +34,9 @@ export default function MeshSimulator() {
   const [encryptedPacket, setEncryptedPacket] = useState(null);
   const [logs, setLogs] = useState([]);
 
-  // Gemini 2.5 Flash Mesh Diagnostics State
+  // Dynamic AI Mesh Diagnostics State
   const [aiMeshDiagnostics, setAiMeshDiagnostics] = useState(
-    'Gemini AI Mesh Diagnostics: Current 3-hop topology (Origin -> Relay Alpha -> Relay Beta -> HQ Gateway) exhibits 99.4% packet delivery reliability with 142ms simulated latency. End-to-end ECDH P-256 forward secrecy verified. Recommend placing mobile repeater at intermediate Sector 2 waypoint to preserve relay battery life.'
+    'AI Mesh Diagnostics: Current 3-hop topology (Origin -> Relay Alpha -> Relay Beta -> HQ Gateway) exhibits 99.4% packet delivery reliability with 142ms simulated latency. End-to-end ECDH P-256 forward secrecy verified. Recommend placing mobile repeater at intermediate Sector 2 waypoint to preserve relay battery life.'
   );
   const [isAiDiagnosing, setIsAiDiagnosing] = useState(false);
 
@@ -164,10 +164,10 @@ export default function MeshSimulator() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-white uppercase tracking-wider">
-                  GEMINI 2.5 FLASH // MESH TOPOLOGY &amp; LATENCY DIAGNOSTICS
+                  AI MESH TOPOLOGY &amp; LATENCY DIAGNOSTICS
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                  gemini-2.5-flash
+                  reliefos-ai
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">
@@ -229,8 +229,13 @@ export default function MeshSimulator() {
         {/* Input Text Box */}
         <div className="mt-5 flex flex-col sm:flex-row items-stretch gap-3">
           <div className="relative flex-1">
+            <label htmlFor="mesh-sim-input" className="sr-only">
+              Simulated emergency distress message
+            </label>
             <input
               type="text"
+              id="mesh-sim-input"
+              name="meshSimInput"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Enter simulated emergency distress message..."

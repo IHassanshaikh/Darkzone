@@ -97,7 +97,9 @@ class ServerDB {
     try {
       const fs = require('fs');
       const path = require('path');
-      const dbFile = path.join(process.cwd(), 'src', 'data', 'db_live_state.json');
+      const runtimeDir = path.join(process.cwd(), '.runtime');
+      if (!fs.existsSync(runtimeDir)) fs.mkdirSync(runtimeDir, { recursive: true });
+      const dbFile = path.join(runtimeDir, 'db_live_state.json');
       const data = {
         messages: this.messages,
         requisitions: this.requisitions,
@@ -117,8 +119,10 @@ class ServerDB {
     try {
       const fs = require('fs');
       const path = require('path');
-      const dbFile = path.join(process.cwd(), 'src', 'data', 'db_live_state.json');
-      if (fs.existsSync(dbFile)) {
+      const runtimeFile = path.join(process.cwd(), '.runtime', 'db_live_state.json');
+      const seedFile = path.join(process.cwd(), 'src', 'data', 'db_live_state.json');
+      const dbFile = fs.existsSync(runtimeFile) ? runtimeFile : fs.existsSync(seedFile) ? seedFile : null;
+      if (dbFile && fs.existsSync(dbFile)) {
         const raw = fs.readFileSync(dbFile, 'utf8');
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed.messages) && parsed.messages.length > 0) this.messages = parsed.messages;

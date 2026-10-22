@@ -1,15 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useApp } from '../context/AppContext';
 import { 
   fetchDuties, 
   updateDutyStatusAction, 
+  createDutyAction,
   queryGeminiAI,
   fetchMessages,
   submitRequisitionAction,
-  fetchCamps
+  fetchCamps,
+  shouldSkipSync,
+  skipSyncFor
 } from '../lib/api';
 import { enqueueAction } from '../lib/offlineQueue';
 import { 
@@ -61,8 +64,9 @@ export default function VolunteerDashboard() {
   const [citizenMessages, setCitizenMessages] = useState([]);
   const [camps, setCamps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isFetchingRef = useRef(false);
 
-  // Gemini 2.5 Flash Field Safety State (Concise & Tactical)
+  // AI Field Safety State
   const [aiSafetyAdvice, setAiSafetyAdvice] = useState(
     'Area C flood surge active (+3.2 ft). Avoid subterranean basements; maintain low-power mesh beacon pinging every 15 min.'
   );
@@ -79,7 +83,7 @@ export default function VolunteerDashboard() {
 
   const handleRunSafetyCheck = async () => {
     setIsAiSafetyLoading(true);
-    showToast('Invoking Gemini 2.5 Flash field safety model...');
+    showToast('Running AI field safety analysis...');
     try {
       const res = await queryGeminiAI({
         task: 'citizen_advisor',
@@ -88,7 +92,7 @@ export default function VolunteerDashboard() {
       });
       if (res?.response) {
         setAiSafetyAdvice(res.response);
-        showToast('Gemini field safety briefing updated!', 'success');
+        showToast('AI field safety briefing updated!', 'success');
       }
     } catch (err) {
       console.warn('Safety advisor error:', err);
@@ -97,7 +101,9 @@ export default function VolunteerDashboard() {
     }
   };
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     try {
       const [allDuties, allMsgs, allCamps] = await Promise.all([
         fetchDuties(),
@@ -114,32 +120,58 @@ export default function VolunteerDashboard() {
       console.error('Failed to load volunteer data:', err);
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  };
+  }, [reqCampId]);
 
   useEffect(() => {
+    let isMounted = true;
     loadData();
+
     const handleSync = () => {
-      fetchMessages().then(setCitizenMessages).catch(() => {});
-      fetchDuties().then(setDuties).catch(() => {});
+      if (isFetchingRef.current || !isMounted || shouldSkipSync()) return;
+      isFetchingRef.current = true;
+      Promise.all([
+        fetchMessages(),
+        fetchDuties()
+      ]).then(([msgs, dts]) => {
+        if (isMounted) {
+          setCitizenMessages(msgs);
+          setDuties(dts);
+        }
+      }).catch(() => {}).finally(() => {
+        isFetchingRef.current = false;
+      });
     };
+
+    // Debounced sync handler
+    let syncTimeout = null;
+    const debouncedSync = () => {
+      if (syncTimeout) clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(handleSync, 800);
+    };
+
     if (typeof window !== 'undefined') {
-      window.addEventListener('reliefos_db_sync', handleSync);
-      window.addEventListener('storage', handleSync);
+      window.addEventListener('reliefos_db_sync', debouncedSync);
+      window.addEventListener('storage', debouncedSync);
     }
-    const interval = setInterval(handleSync, 3000);
+    // Reduced interval from 3s to 15s
+    const interval = setInterval(handleSync, 15000);
 
     return () => {
+      isMounted = false;
       if (typeof window !== 'undefined') {
-        window.removeEventListener('reliefos_db_sync', handleSync);
-        window.removeEventListener('storage', handleSync);
+        window.removeEventListener('reliefos_db_sync', debouncedSync);
+        window.removeEventListener('storage', debouncedSync);
       }
       clearInterval(interval);
+      if (syncTimeout) clearTimeout(syncTimeout);
     };
-  }, []);
+  }, [loadData]);
 
   const handleStatusChange = async (dutyId, nextStatus) => {
     // 1. Instant optimistic update so badge and button change immediately
+    skipSyncFor(3000);
     setDuties(prev => prev.map(d => d.id === dutyId ? { ...d, status: nextStatus, updatedAt: new Date().toISOString() } : d));
 
     if (!isOnline) {
@@ -148,15 +180,18 @@ export default function VolunteerDashboard() {
         payload: { dutyId, status: nextStatus },
         timestamp: new Date().toISOString()
       });
-      showToast(`Offline action saved to IndexedDB! Pending sync badge incremented.`, 'warning');
+      showToast(`Offline action saved! Pending sync badge incremented.`, 'warning');
     } else {
       try {
         await updateDutyStatusAction(dutyId, nextStatus);
         showToast(`Duty status updated to ${nextStatus.replace('_', ' ')}.`, 'success');
-        const fresh = await fetchDuties();
-        if (Array.isArray(fresh) && fresh.length > 0) {
-          setDuties(fresh);
-        }
+        // Delay fresh fetch to avoid overwriting optimistic update
+        setTimeout(async () => {
+          const fresh = await fetchDuties();
+          if (Array.isArray(fresh) && fresh.length > 0) {
+            setDuties(fresh);
+          }
+        }, 1500);
       } catch (err) {
         showToast(`Failed: ${err.message}`, 'error');
         await loadData();
@@ -185,6 +220,68 @@ export default function VolunteerDashboard() {
       showToast(`Requisition failed: ${err.message}`, 'error');
     } finally {
       setIsSubmittingReq(false);
+    }
+  };
+
+  // Convert SOS into an assigned field duty for this volunteer
+  const handleAcceptSosAsDuty = async (msg) => {
+    skipSyncFor(4000);
+    const newDuty = {
+      id: `duty-sos-${Date.now()}`,
+      volunteerId: currentVolunteerId,
+      volunteerName: currentVolunteerName,
+      title: `DISPATCH: Respond to SOS from ${msg.senderName || 'Citizen'}`,
+      location: msg.location || 'Area C (Delta Sector)',
+      areaId: 'area-c',
+      status: 'in_progress',
+      priority: 'critical',
+      notes: `Citizen distress: "${msg.text}". Mesh route: ${msg.hopRoute || 'BLE Mesh'}.`,
+      type: 'rescue',
+      instructions: `Immediate Field Action: ${msg.text}`,
+      toName: msg.location || 'Sector Delta 9',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    try {
+      await createDutyAction(newDuty);
+      setDuties(prev => [newDuty, ...prev]);
+      showToast(`Duty accepted! Added to your active assignments.`, 'success');
+    } catch (err) {
+      showToast(`Failed to accept duty: ${err.message}`, 'error');
+    }
+  };
+
+  // Pre-fill requisition modal for this citizen SOS
+  const handleOpenReqForSos = (msg) => {
+    let detectedItem = 'water';
+    const textLower = (msg.text || '').toLowerCase();
+    if (textLower.includes('water') || textLower.includes('drink')) detectedItem = 'water';
+    else if (textLower.includes('food') || textLower.includes('ration') || textLower.includes('feed')) detectedItem = 'food';
+    else if (textLower.includes('medic') || textLower.includes('doctor') || textLower.includes('injury') || textLower.includes('bleed')) detectedItem = 'medicine';
+    else if (textLower.includes('blanket') || textLower.includes('tarp') || textLower.includes('shelter')) detectedItem = 'relief';
+
+    setReqItem(detectedItem);
+    setReqNotes(`Emergency supplies requested to support field responder for citizen SOS: "${msg.text}" (From: ${msg.senderName || 'Citizen'})`);
+    setReqPriority('critical');
+    setShowReqModal(true);
+  };
+
+  // Escalate SOS directly to Camp Manager with Critical Priority
+  const handleEscalateSos = async (msg) => {
+    skipSyncFor(4000);
+    try {
+      await submitRequisitionAction({
+        volunteerId: currentVolunteerId,
+        volunteerName: currentVolunteerName,
+        campId: camps[0]?.id || 'camp-b',
+        campName: camps[0]?.name || 'Camp B (Coastal School)',
+        items: [{ item: 'water', quantity: 100, unit: 'Liters' }, { item: 'medicine', quantity: 20, unit: 'Packs' }],
+        priority: 'critical',
+        notes: `ESCALATED CITIZEN SOS: "${msg.text}" from ${msg.senderName || 'Citizen'}. Field scout ${currentVolunteerName} requesting priority Camp Manager intervention.`
+      });
+      showToast(`SOS escalated to Camp Manager with CRITICAL priority!`, 'success');
+    } catch (err) {
+      showToast(`Escalation failed: ${err.message}`, 'error');
     }
   };
 
@@ -218,6 +315,8 @@ export default function VolunteerDashboard() {
                 {currentVolunteer.role}
               </span>
               <select
+                id="volunteer-selector"
+                name="volunteerSelector"
                 value={selectedVolId}
                 onChange={(e) => setSelectedVolId(e.target.value)}
                 className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer ml-1"
@@ -274,7 +373,7 @@ export default function VolunteerDashboard() {
         </div>
       </div>
 
-      {/* GEMINI 2.5 FLASH FIELD SAFETY ADVISOR */}
+      {/* AI FIELD SAFETY ADVISOR */}
       <div className="rounded-xl border border-[#2D4A22]/30 bg-gradient-to-r from-[#1C3315]/10 via-[#2D4A22]/15 to-[#3E6630]/10 p-4 shadow-sm backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2D4A22]/20">
           <div className="flex items-center gap-2.5">
@@ -284,10 +383,10 @@ export default function VolunteerDashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-black font-mono text-slate-900 dark:text-slate-100 uppercase tracking-wider">
-                  GEMINI 2.5 FLASH // FIELD RESPONDER SAFETY ADVISOR
+                  AI FIELD RESPONDER SAFETY ADVISOR
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                  gemini-2.5-flash
+                  reliefos-ai
                 </span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans mt-0.5">
@@ -331,7 +430,7 @@ export default function VolunteerDashboard() {
             </Link>
             <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-              LIVE POLLING (3s)
+              LIVE
             </span>
           </div>
         </div>
@@ -371,11 +470,36 @@ export default function VolunteerDashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-start md:self-center">
-                  <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Delivered to Volunteer
-                  </span>
+                <div className="flex flex-wrap items-center gap-2 self-start md:self-center">
+                  <button
+                    type="button"
+                    onClick={() => handleAcceptSosAsDuty(msg)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 shadow-xs transition flex items-center gap-1"
+                    title="Accept this citizen SOS as an active duty for yourself"
+                  >
+                    <Navigation className="w-3 h-3" />
+                    <span>Accept Duty</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenReqForSos(msg)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 shadow-xs transition flex items-center gap-1"
+                    title="Request supplies from Camp Manager to fulfill this SOS"
+                  >
+                    <Package className="w-3 h-3" />
+                    <span>Request Camp Help</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleEscalateSos(msg)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-red-600 hover:bg-red-500 shadow-xs transition flex items-center gap-1"
+                    title="Escalate directly to Camp Manager"
+                  >
+                    <Send className="w-3 h-3" />
+                    <span>Escalate to Manager</span>
+                  </button>
                 </div>
               </div>
             ))}
@@ -463,7 +587,7 @@ export default function VolunteerDashboard() {
                       isAssigned
                         ? 'bg-amber-50 text-amber-800 border border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-600/40'
                         : isInProgress
-                        ? 'bg-sky-50 text-sky-800 border border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-500/40 animate-pulse'
+                        ? 'bg-sky-50 text-sky-800 border border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-500/40'
                         : 'bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-500/40'
                     }`}>
                       {duty.status.replace('_', ' ')}
@@ -509,9 +633,19 @@ export default function VolunteerDashboard() {
                     </button>
                   )}
                   {isDone && (
-                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> Completed
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
+                        <CheckCircle2 className="w-4 h-4" /> Completed
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleStatusChange(duty.id, 'in_progress')}
+                        className="px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 hover:text-slate-200 border border-slate-700 hover:border-slate-500 transition"
+                        title="Reopen task"
+                      >
+                        Re-open
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -541,10 +675,12 @@ export default function VolunteerDashboard() {
 
             <form onSubmit={handleRequisitionSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="vol-req-camp" className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Target Camp
                 </label>
                 <select
+                  id="vol-req-camp"
+                  name="reqCampId"
                   value={reqCampId}
                   onChange={(e) => setReqCampId(e.target.value)}
                   className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
@@ -557,10 +693,12 @@ export default function VolunteerDashboard() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="vol-req-item" className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Resource Category
                   </label>
                   <select
+                    id="vol-req-item"
+                    name="reqItem"
                     value={reqItem}
                     onChange={(e) => setReqItem(e.target.value)}
                     className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
@@ -573,11 +711,13 @@ export default function VolunteerDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label htmlFor="vol-req-qty" className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Quantity Needed
                   </label>
                   <input
                     type="number"
+                    id="vol-req-qty"
+                    name="reqQty"
                     min="1"
                     value={reqQty}
                     onChange={(e) => setReqQty(e.target.value)}
@@ -610,10 +750,12 @@ export default function VolunteerDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label htmlFor="vol-req-notes" className="block text-xs font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Operational Reason / Notes
                 </label>
                 <textarea
+                  id="vol-req-notes"
+                  name="reqNotes"
                   rows={2}
                   value={reqNotes}
                   onChange={(e) => setReqNotes(e.target.value)}

@@ -44,24 +44,24 @@ export default function VerificationView() {
   const [rejectNote, setRejectNote] = useState('Ground inspection verified area is stable; no structural or flood entrapment.');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Gemini 2.5 Flash Dark Zone Evidence State
+  // Dynamic AI Dark Zone Evidence State
   const [aiEvidenceEvaluation, setAiEvidenceEvaluation] = useState(
-    'Gemini AI Evidence Synthesis: Delta Sector 9 (Area C) has 98% silence over 4.5 hours with high baseline density (4,500 pop). Bayesian distress probability: 94.2%. Field Recommendation: Confirm dark zone status and dispatch amphibious reconnaissance team (vol-1, vol-4) immediately.'
+    'AI Evidence Synthesis: Delta Sector 9 (Area C) has 98% silence over 4.5 hours with high baseline density (4,500 pop). Bayesian distress probability: 94.2%. Field Recommendation: Confirm dark zone status and dispatch amphibious reconnaissance team (vol-1, vol-4) immediately.'
   );
   const [isAiEvaluating, setIsAiEvaluating] = useState(false);
 
   const handleRunAiEvaluation = async () => {
     setIsAiEvaluating(true);
-    showToast('Invoking Gemini 2.5 Flash dark zone evaluator...');
+    showToast('Running AI dark zone evaluator...');
     try {
       const res = await queryGeminiAI({
         task: 'dark_zone_analysis',
-        prompt: `Synthesize dark zone evidence for pending sectors (${areas.filter(a => a.assessment?.isDarkZone || a.id === 'area-c').length} sectors flagged). Evaluate cellular blackout probability, victim entrapment risk, and recommend whether commanders should Confirm or Clear each zone.`,
+        prompt: `Synthesize dark zone evidence for pending sectors (${areas.filter(a => a.assessment?.isDarkZone || a.id === 'area-c').length} sectors flagged). Evaluate cellular blackout probability, victim entrapment risk, and recommend whether commanders should Confirm or Clear each zone. Keep under 35 words.`,
         context: { areasCount: areas.length, volunteersCount: volunteers.length }
       });
       if (res?.response) {
         setAiEvidenceEvaluation(res.response);
-        showToast('Gemini dark zone evaluation updated!', 'success');
+        showToast('AI dark zone evaluation updated!', 'success');
       }
     } catch (err) {
       console.warn('AI evaluation error:', err);
@@ -190,7 +190,7 @@ export default function VerificationView() {
         </button>
       </div>
 
-      {/* GEMINI 2.5 FLASH DARK ZONE EVIDENCE EVALUATOR */}
+      {/* AI DARK ZONE EVIDENCE EVALUATOR */}
       <div className="rounded-xl border border-[#2D4A22]/30 bg-gradient-to-r from-[#1C3315]/10 via-[#2D4A22]/15 to-[#3E6630]/10 p-4 shadow-sm backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2D4A22]/20">
           <div className="flex items-center gap-2.5">
@@ -200,10 +200,10 @@ export default function VerificationView() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-white uppercase tracking-wider">
-                  GEMINI 2.5 FLASH // DARK ZONE EVIDENCE EVALUATOR
+                  AI DARK ZONE EVIDENCE EVALUATOR
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                  gemini-2.5-flash
+                  reliefos-ai
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">

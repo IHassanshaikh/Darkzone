@@ -28,11 +28,29 @@ function loadStoredArray(key, fallback) {
   }
 }
 
+let isBroadcastingSync = false;
+
+// Global flag: skip the next sync cycle after an optimistic update to prevent flicker
+let _skipSyncUntil = 0;
+export function skipSyncFor(ms = 2000) { _skipSyncUntil = Date.now() + ms; }
+export function shouldSkipSync() { return Date.now() < _skipSyncUntil; }
+
 function saveStoredArray(key, val) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(key, JSON.stringify(val));
-    window.dispatchEvent(new CustomEvent('reliefos_db_sync', { detail: { key } }));
+    const serialized = JSON.stringify(val);
+    const existing = localStorage.getItem(key);
+    if (existing === serialized) return; // No change, do not trigger sync loop!
+    localStorage.setItem(key, serialized);
+
+    if (!isBroadcastingSync) {
+      isBroadcastingSync = true;
+      try {
+        window.dispatchEvent(new CustomEvent('reliefos_db_sync', { detail: { key } }));
+      } finally {
+        setTimeout(() => { isBroadcastingSync = false; }, 1500);
+      }
+    }
   } catch {}
 }
 
@@ -512,7 +530,25 @@ export async function submitCampRequisitionAction(reqData) {
     } catch {}
   }
 
+  const newReqRecord = {
+    id: newDuty.id,
+    volunteerId: 'camp-mgr',
+    volunteerName: `${reqData.campName} Manager`,
+    campId: reqData.campId,
+    campName: reqData.campName,
+    items: [{ item: reqData.item, quantity: Number(reqData.quantity), unit: reqData.item === 'water' ? 'Liters' : 'Packs' }],
+    priority: reqData.priority || 'critical',
+    notes: reqData.notes || '',
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
   localStore.duties.unshift(newDuty);
+  localStore.save('duties');
+  localStore.requisitions.unshift(newReqRecord);
+  localStore.save('requisitions');
+
   localStore.logActivity(
     'requisition',
     `Emergency Requisition from ${reqData.campName}: ${reqData.quantity} ${reqData.item} (${reqData.priority?.toUpperCase()}).`,
@@ -575,6 +611,7 @@ export async function addSafeZoneAction(zoneData) {
   };
 
   localStore.camps.push(newZone);
+  localStore.save('camps');
   localStore.logActivity('safe_zone', `New designated Safe Zone added: ${newZone.name}.`);
   return newZone;
 }
@@ -630,6 +667,49 @@ export async function fetchDuties() {
     } catch {}
   }
   return localStore.duties;
+}
+
+export async function createDutyAction(dutyData) {
+  const newDuty = {
+    id: dutyData.id || `duty-${Date.now()}`,
+    volunteerId: dutyData.volunteerId,
+    volunteerName: dutyData.volunteerName || 'Volunteer',
+    title: dutyData.title || dutyData.instructions,
+    location: dutyData.location || dutyData.toName || 'Field Zone',
+    areaId: dutyData.areaId || 'area-c',
+    status: dutyData.status || 'assigned',
+    priority: dutyData.priority || 'high',
+    notes: dutyData.notes || '',
+    type: dutyData.type || 'field_task',
+    instructions: dutyData.instructions || dutyData.title,
+    toName: dutyData.toName || dutyData.location,
+    fromCampId: dutyData.fromCampId,
+    fromCampName: dutyData.fromCampName,
+    item: dutyData.item,
+    quantity: dutyData.quantity,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  localStore.duties.unshift(newDuty);
+  localStore.save('duties');
+
+  if (await checkBackendHealth()) {
+    try {
+      const res = await fetch(`${API_BASE}/duties`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newDuty)
+      });
+      if (res.ok) {
+        const body = await res.json();
+        return body.data || newDuty;
+      }
+    } catch (err) {
+      console.warn('Network duty creation failed, stored locally:', err);
+    }
+  }
+  return newDuty;
 }
 
 export async function updateDutyStatusAction(dutyId, status) {
@@ -695,7 +775,7 @@ export async function fetchAllocationSuggestions() {
       }
     } catch {}
   }
-  return generateAllocationSuggestions(localStore.camps, []);
+  return generateAllocationSuggestions(localStore.camps, [], localStore.duties);
 }
 
 export async function approveAllocationAction(suggestionId) {
@@ -717,10 +797,20 @@ export async function approveAllocationAction(suggestionId) {
     } catch {}
   }
 
-  const suggestions = generateAllocationSuggestions(localStore.camps, []);
+  const suggestions = generateAllocationSuggestions(localStore.camps, [], localStore.duties);
   const suggestion = suggestions.find(s => s.suggestionId === suggestionId || s.id === suggestionId);
 
   if (!suggestion) return { error: 'Suggestion not found' };
+
+  // Deduct donor stock locally
+  const donorCamp = localStore.camps.find(c => c.id === suggestion.fromCampId);
+  if (donorCamp && Array.isArray(donorCamp.items)) {
+    const itm = donorCamp.items.find(i => (i.item || i.name || '').toLowerCase() === suggestion.item.toLowerCase());
+    if (itm && itm.stock !== undefined) {
+      itm.stock = Math.max(0, itm.stock - suggestion.quantity);
+      localStore.save('camps');
+    }
+  }
 
   // Create a delivery duty
   const newDuty = {
@@ -1059,7 +1149,7 @@ export function extractKeywordsFromText(text = '') {
 }
 
 /**
- * ReliefOS Gemini 2.5 Flash Integration Client
+ * ReliefOS AI Integration Client
  * Invokes backend /api/v1/ai endpoint
  */
 export async function queryGeminiAI({ prompt, task = 'chat', context = {} }) {
@@ -1074,8 +1164,8 @@ export async function queryGeminiAI({ prompt, task = 'chat', context = {} }) {
   } catch (err) {
     console.warn('AI query network fallback:', err);
     return {
-      response: 'Gemini AI offline triage active. Prioritize vertical evacuation to high ground, keep devices on low-energy mode, and signal field scouts.',
-      model: 'ReliefOS Heuristic Engine'
+      response: 'ReliefOS AI offline triage active. Prioritize vertical evacuation to high ground, keep devices on low-energy mode, and signal field scouts.',
+      model: 'ReliefOS AI Engine'
     };
   }
 }

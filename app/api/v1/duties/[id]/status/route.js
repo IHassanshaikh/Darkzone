@@ -8,14 +8,23 @@ export async function PATCH(request, context) {
     let body = {};
     try {
       body = await request.json();
-    } catch {
-      body = {};
+    } catch (e) {
+      console.warn('request.json() failed:', e);
+      try {
+        const text = await request.text();
+        body = JSON.parse(text);
+      } catch {}
     }
-    const { status } = body;
+    const status = (body?.status || '').trim().toLowerCase();
 
     const valid = ['assigned', 'in_progress', 'done'];
     if (!valid.includes(status)) {
-      return NextResponse.json({ error: { code: 'INVALID_STATUS', message: 'Invalid status' } }, { status: 400 });
+      return NextResponse.json({ 
+        error: { 
+          code: 'INVALID_STATUS', 
+          message: `Invalid status: "${status}". Received body: ${JSON.stringify(body)}` 
+        } 
+      }, { status: 400 });
     }
 
     const duty = db.duties.find(d => d.id === id || String(d.id).toLowerCase() === String(id).toLowerCase());

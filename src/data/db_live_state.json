@@ -1,6 +1,19 @@
 {
   "messages": [
     {
+      "id": "msg-1792614036777",
+      "sender": "citizen",
+      "senderName": "Citizen Mobile (Sector Delta 9)",
+      "recipientId": "vol-3",
+      "recipientName": "Fatima Noor",
+      "text": "[EMERGENCY SOS: Citizen Message] hello",
+      "category": "Citizen Message",
+      "hopRoute": "Your Phone → Peer Mobile (14m) → Volunteer Mobile → HQ",
+      "status": "delivered",
+      "timestamp": "01:20 AM",
+      "createdAt": "2026-10-21T20:20:36.813Z"
+    },
+    {
       "id": "msg-1792340993875",
       "sender": "user",
       "senderName": "Citizen Mobile",
@@ -66,6 +79,19 @@
   ],
   "duties": [
     {
+      "id": "duty-sos-1792614036813",
+      "volunteerId": "vol-3",
+      "volunteerName": "Fatima Noor",
+      "title": "EMERGENCY DISPATCH: Citizen Message",
+      "location": "Area C (Delta Sector)",
+      "areaId": "area-c",
+      "status": "assigned",
+      "priority": "critical",
+      "notes": "Distress text: \"[EMERGENCY SOS: Citizen Message] hello\". Route: Your Phone → Peer Mobile (14m) → Volunteer Mobile → HQ",
+      "type": "rescue",
+      "createdAt": "2026-10-21T20:20:36.813Z"
+    },
+    {
       "id": "duty-del-1792343613433",
       "volunteerId": "vol-3",
       "volunteerName": "Fatima Noor",
@@ -84,11 +110,12 @@
       "volunteerName": "Fatima Noor",
       "title": "SUPPLY CONVOY DISPATCH: Camp B (Coastal School)",
       "location": "Camp B (Coastal School)",
-      "status": "in_progress",
+      "status": "done",
       "priority": "high",
       "notes": "Fulfilling requisition req-seed-1 for field responder Fatima Noor.",
       "type": "delivery",
-      "createdAt": "2026-10-18T17:02:51.010Z"
+      "createdAt": "2026-10-18T17:02:51.010Z",
+      "updatedAt": "2026-10-21T21:51:02.309Z"
     },
     {
       "id": "duty-sos-1792340993875",
@@ -336,6 +363,19 @@
   ],
   "reports": [
     {
+      "id": "rep-1792614058008",
+      "text": "[CITIZEN SOS MOBILE-TO-MOBILE] hello (Relayed by Volunteer Fatima Noor)",
+      "areaId": "area-c",
+      "source": "citizen_mobile_ble",
+      "label": "Suggested",
+      "extracted": {
+        "urgency": "high",
+        "assistanceNeeded": "Citizen Message"
+      },
+      "clientId": null,
+      "createdAt": "2026-10-21T20:20:58.008Z"
+    },
+    {
       "id": "rep-001",
       "areaId": "area-c",
       "text": "Water entered ground floor, grandma cannot walk, need evacuation boat quickly near delta bridge.",
@@ -498,6 +538,27 @@
   ],
   "notifications": [
     {
+      "id": "notif-1792614036814-sc98",
+      "type": "sos_message",
+      "title": "EMERGENCY SOS // CITIZEN MESSAGE",
+      "message": "From Citizen Mobile (Sector Delta 9): \"[EMERGENCY SOS: Citizen Message] hello\" (Routed to Fatima Noor)",
+      "targetRole": "all",
+      "targetRoles": [
+        "all",
+        "volunteer",
+        "admin",
+        "coordinator"
+      ],
+      "targetVolunteerId": "vol-3",
+      "link": "/volunteer",
+      "acknowledged": true,
+      "timestamp": "2026-10-21T20:20:36.814Z",
+      "meta": {
+        "messageId": "msg-1792614036777",
+        "dutyId": "duty-sos-1792614036813"
+      }
+    },
+    {
       "id": "notif-1792343613434-im37",
       "type": "requisition_approved",
       "title": "REQUISITION APPROVED",
@@ -563,24 +624,31 @@
   ],
   "activityLog": [
     {
+      "id": 1792619462309,
+      "kind": "duty",
+      "message": "Duty #971010 status updated to done.",
+      "timestamp": "2026-10-21T21:51:02.309Z",
+      "label": "Suggested"
+    },
+    {
       "id": 1,
       "kind": "system",
       "message": "ReliefOS Next.js API Route Handlers active.",
-      "timestamp": "2026-10-21T17:53:38.480Z",
+      "timestamp": "2026-10-21T21:47:53.955Z",
       "label": null
     },
     {
       "id": 2,
       "kind": "dark_zone",
       "message": "Potential Dark Zone flagged in Delta Sector 9 (Area C) based on 98% reporting silence.",
-      "timestamp": "2026-10-21T17:53:38.480Z",
+      "timestamp": "2026-10-21T21:47:53.955Z",
       "label": "Suggested"
     },
     {
       "id": 3,
       "kind": "shortage",
       "message": "Critical water shortage detected at Camp B (Coastal School). Deficit: 160L.",
-      "timestamp": "2026-10-21T17:53:38.480Z",
+      "timestamp": "2026-10-21T21:47:53.955Z",
       "label": "Suggested"
     }
   ]

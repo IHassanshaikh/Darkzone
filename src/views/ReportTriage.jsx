@@ -52,11 +52,11 @@ export default function ReportTriage() {
     }
   ];
 
-  const handleRunGeminiTriage = async (customText = null) => {
+  const handleRunAiTriage = async (customText = null) => {
     const textToAnalyze = customText || inputText;
     if (!textToAnalyze.trim()) return;
     setIsAnalyzingWithAi(true);
-    showToast('Invoking Gemini 2.5 Flash emergency triage model...');
+    showToast('Running AI emergency triage model...');
     try {
       const res = await queryGeminiAI({
         task: 'triage',
@@ -65,11 +65,11 @@ export default function ReportTriage() {
       });
       if (res?.response) {
         setGeminiTriageResult(res.response);
-        showToast('Gemini 2.5 Flash triage analysis complete!', 'success');
+        showToast('AI autonomous triage analysis complete!', 'success');
       }
     } catch (err) {
-      console.warn('Gemini triage error:', err);
-      showToast('Gemini offline, local heuristic triage applied.', 'error');
+      console.warn('AI triage error:', err);
+      showToast('AI offline, local heuristic triage applied.', 'error');
     } finally {
       setIsAnalyzingWithAi(false);
     }
@@ -126,10 +126,12 @@ export default function ReportTriage() {
         {/* Left: Raw Text Input Box & Presets */}
         <div className="lg:col-span-6 space-y-3">
           <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xs">
-            <label className="block text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+            <label htmlFor="distress-transcript-input" className="block text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               DISTRESS MESSAGE TRANSCRIPT / SMS / MESH
             </label>
             <textarea
+              id="distress-transcript-input"
+              name="distressTranscript"
               rows={4}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -152,12 +154,12 @@ export default function ReportTriage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleRunGeminiTriage()}
+                  onClick={() => handleRunAiTriage()}
                   disabled={isAnalyzingWithAi || !inputText.trim()}
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-[#1C3315] via-[#2D4A22] to-[#3E6630] hover:opacity-90 text-white shadow-xs transition-opacity disabled:opacity-50"
                 >
                   <Sparkles className={`w-3.5 h-3.5 text-emerald-300 ${isAnalyzingWithAi ? 'animate-spin' : ''}`} />
-                  <span>{isAnalyzingWithAi ? 'Triage Running...' : 'Gemini 2.5 Flash Triage'}</span>
+                  <span>{isAnalyzingWithAi ? 'Triage Running...' : 'AI Autonomous Triage'}</span>
                 </button>
                 <button
                   type="button"
@@ -212,16 +214,16 @@ export default function ReportTriage() {
                 </span>
               </div>
 
-              {/* LIVE GEMINI 2.5 FLASH DEEP TRIAGE RESULT */}
+              {/* LIVE AI DEEP TRIAGE RESULT */}
               {geminiTriageResult && (
                 <div className="mt-4 p-3.5 rounded-xl bg-gradient-to-br from-[#1C3315]/10 via-[#2D4A22]/15 to-transparent border border-[#2D4A22]/30 shadow-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-[#2D4A22]/20">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-[#2D4A22] dark:text-emerald-400">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Gemini 2.5 Flash Autonomous Triage</span>
+                      <span>AI Autonomous Triage</span>
                     </div>
                     <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
-                      gemini-2.5-flash
+                      reliefos-ai
                     </span>
                   </div>
                   <div className="mt-2 text-xs font-medium text-slate-800 dark:text-slate-200 leading-relaxed font-sans whitespace-pre-line">
